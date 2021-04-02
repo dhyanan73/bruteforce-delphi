@@ -75,17 +75,49 @@ var
   frmMain: TfrmMain;
 
 
-procedure DoBruteForce  (
-                        var BruteForce: TBruteForce;
-                        ProgressCallback: TProgressCallback;
-                        MaxCount: Int64 = 0;
-                        TaskFinishedCallBack: TThreadProcedure = nil
-                      );
-
-
 implementation
 
 {$R *.fmx}
+
+uses
+  System.Diagnostics
+  , System.TimeSpan;
+
+
+function HumanElapsedTime(Milliseconds: Int64; ShowInfo: boolean = true): string;
+var
+  Ms: Int64;
+  Seconds: Int64;
+  Minutes: Int64;
+  Hours: Int64;
+  Days: Int64;
+
+begin
+
+  Ms := 0;
+  Seconds := 0;
+  Minutes := 0;
+  Hours := 0;
+  Days := 0;
+
+  if Milliseconds > 0 then
+  begin
+    Seconds := Trunc(Milliseconds / 1000);
+    Ms := Milliseconds mod 1000;
+    Minutes := Trunc(Seconds / 60);
+    Seconds := Seconds mod 60;
+    Hours := Trunc(Minutes / 60);
+    Minutes := Minutes mod 60;
+    Days := Trunc(Hours / 24);
+    Hours := Hours mod 24;
+  end;
+
+  Result := Format('%d:%d:%d:%d:%d', [Days, Hours, Minutes, Seconds, Ms]);
+
+  if ShowInfo then
+    Result := Result + ' (days:hours:minutes:seconds:milliseconds)';
+
+end;
 
 procedure DoBruteForce  (
                         var BruteForce: TBruteForce;
@@ -174,6 +206,9 @@ begin
 end;
 
 procedure TfrmMain.cmdStartBTClick(Sender: TObject);
+var
+  Stopwatch: TStopwatch;
+
 begin
 
   if not ValidateBruteforce then
@@ -190,6 +225,8 @@ begin
     Application.ProcessMessages;
     grdOutputBT.BeginUpdate;
     try
+      txtLog.SetFocus;
+      Stopwatch := TStopwatch.StartNew;
       CurrTask := TTask.Create (
                       procedure
                       begin
@@ -201,10 +238,25 @@ begin
                                     );
                       end
                     ).Start;
-      while Assigned(CurrTask) and (not (CurrTask.Status in [TTaskStatus.Completed, TTaskStatus.Canceled, TTaskStatus.Exception])) do
+      while
+            Assigned(CurrTask)
+            and (not  (
+                        CurrTask.Status in  [
+                                              TTaskStatus.Completed,
+                                              TTaskStatus.Canceled,
+                                              TTaskStatus.Exception
+                                            ]
+                      )) do
         Application.ProcessMessages;
     finally
-      Log(Format('Completed bruteforce for %d passwords on %d', [Bruteforce.Done, Bruteforce.Total]));
+      Log(Format  (
+                    'Completed bruteforce for %d passwords on %d in %s',
+                    [
+                      Bruteforce.Done,
+                      Bruteforce.Total,
+                      HumanElapsedTime(Trunc(Stopwatch.Elapsed.TotalMilliseconds))
+                    ]
+                  ));
       grdOutputBT.EndUpdate;
       panWait.Visible := false;
       TabControl1.Enabled := true;
@@ -235,7 +287,6 @@ begin
 
   TabControl1.Enabled := false;
   Application.ProcessMessages;
-//  SaveSettings;
 
   if Assigned(CurrTask) then
   begin
@@ -368,7 +419,6 @@ begin
   Result := true;
 
   try
-//    cmdStartBT.Enabled := true;
     Characters := txtCharacters.Text;
     MinLength := StrToInt(txtMinLength.Text);
     MaxLength := StrToInt(txtMaxLength.Text);
@@ -399,7 +449,6 @@ begin
     on E: Exception do
     begin
       Result := false;
-//      cmdStartBT.Enabled := false;
       Log(E.Message, ltError);
     end;
   end;

@@ -26,7 +26,7 @@ type
     property Characters: string read FChars;
     property MinLength: smallint read FMinLen default 0;
     property MaxLength: smallint read FMaxLen default 0;
-    constructor Create(Characters: string; MinLength: TCredentialLength; MaxLength: TCredentialLength);
+    constructor Create (Characters: string; MinLength, MaxLength: TCredentialLength);
     destructor Destroy; override;
     function Next: string;
     procedure Reset;
@@ -130,10 +130,7 @@ var
   Completed, Increment: boolean;
 
 begin
-{
-if FTotal = (FDone + 1) then
-  FDone := FDone;
-}
+
   Result := '';
 
   if not FLast then
