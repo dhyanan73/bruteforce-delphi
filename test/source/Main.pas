@@ -312,7 +312,7 @@ begin
   BruteforceDict := nil;
   BruteforceFile := nil;
   TabControl1.ActiveTab := TabItem1;
-  txtStoAt.Max := High(integer);
+  txtStoAt.Max := 999999999;
 
 end;
 
