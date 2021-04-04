@@ -11,12 +11,13 @@ uses
 
 type
   TIoTLogType = (ltUnknown, ltInfo, ltAlert, ltError);
-  TProgressCallback = procedure(Password: string; Total: Int64; Done: Int64; ToDo: Int64; ErrMsg: string = '') of object;
+  TBFProgressCallback = procedure(Password: string; Total: Int64; Done: Int64; ToDo: Int64; ErrMsg: string = '') of object;
+  TDICTProgressCallback = procedure(Password: TCredentials; Total: Int64; Done: Int64; ToDo: Int64; ErrMsg: string = '') of object;
 
   TfrmMain = class(TForm)
-    TabControl1: TTabControl;
-    TabItem1: TTabItem;
-    TabItem2: TTabItem;
+    tabMain: TTabControl;
+    tabBruteforce: TTabItem;
+    tabDictionary: TTabItem;
     TabItem3: TTabItem;
     GestureManager1: TGestureManager;
     Layout1: TLayout;
@@ -44,6 +45,33 @@ type
     labWaitDone: TLabel;
     lblWaitToDo: TLabel;
     lblWaitTotal: TLabel;
+    grdOutputDICT: TStringGrid;
+    colOutUsernameDict: TStringColumn;
+    layDictionary: TLayout;
+    Layout4: TLayout;
+    cmdStartDICT: TButton;
+    cmdResetDict: TButton;
+    tabDictionaryBF: TTabControl;
+    tabUsernameDict: TTabItem;
+    tabPasswordDict: TTabItem;
+    chkBruteforce: TCheckBox;
+    StyleBook1: TStyleBook;
+    colOutPasswordDict: TStringColumn;
+    panUserNameDicCommands: TPanel;
+    cmdAddUserNameDic: TButton;
+    cmdClearUserNameDic: TButton;
+    cmdLoadUserNameDic: TButton;
+    lblUserNameDicCount: TLabel;
+    panPasswordCommands: TPanel;
+    cmdAddPasswordDic: TButton;
+    cmdClearPasswordDic: TButton;
+    cmdLoadPasswordDic: TButton;
+    lblPasswordDicCount: TLabel;
+    grdUsernameDict: TStringGrid;
+    colUsernameDict: TStringColumn;
+    grdPasswordDict: TStringGrid;
+    colPasswordDict: TStringColumn;
+    dlgOpenFile: TOpenDialog;
     procedure FormCreate(Sender: TObject);
     procedure FormGesture (
                             Sender: TObject;
@@ -51,22 +79,35 @@ type
                             var Handled: Boolean
                           );
     procedure grdOutputBTResized(Sender: TObject);
-    procedure ProgressCallback(Password: string; Total: Int64; Done: Int64; ToDo: Int64; ErrMsg: string = '');
+    procedure BFProgressCallback(Password: string; Total: Int64; Done: Int64; ToDo: Int64; ErrMsg: string = '');
+    procedure DICTProgressCallback(Password: TCredentials; Total: Int64; Done: Int64; ToDo: Int64; ErrMsg: string = '');
     procedure cmdStopClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormDestroy(Sender: TObject);
     procedure cmdStartBTClick(Sender: TObject);
     procedure cmdResetClick(Sender: TObject);
+    procedure grdOutputDICTResized(Sender: TObject);
+    procedure FormResize(Sender: TObject);
+    procedure grdUsernameDictResized(Sender: TObject);
+    procedure grdPasswordDictResized(Sender: TObject);
+    procedure cmdLoadUserNameDicClick(Sender: TObject);
+    procedure cmdClearUserNameDicClick(Sender: TObject);
+    procedure cmdAddUserNameDicClick(Sender: TObject);
+    procedure cmdLoadPasswordDicClick(Sender: TObject);
+    procedure cmdAddPasswordDicClick(Sender: TObject);
+    procedure cmdClearPasswordDicClick(Sender: TObject);
+    procedure cmdResetDictClick(Sender: TObject);
+    procedure cmdStartDICTClick(Sender: TObject);
   private
     CurrTask: ITask;
     Bruteforce: TBruteForce;
     BruteforceDict: TBruteForceEx;
-    BruteforceFile: TBruteForce;
-    procedure AddRow(StringGrid: TStringGrid; Value: string);
-    procedure ClearRows(StringGrid: TStringGrid);
     procedure Log(const Msg: string; LogType: TIoTLogType = TIoTLogType.ltInfo);
     procedure TaskFinished;
     function ValidateBruteforce: boolean;
+    function ValidateDictionary: boolean;
+    function OpenFile: string;
+    procedure LoadRowsFromFile(StringGrid: TStringGrid);
   public
     procedure CancelTask(Task: ITask);
   end;
@@ -78,11 +119,72 @@ var
 implementation
 
 {$R *.fmx}
+{$R *.Windows.fmx MSWINDOWS}
 
 uses
   System.Diagnostics
   , System.TimeSpan;
 
+function StrArraysEquals(Array1: TArray<string>; Array2: TArray<string>): boolean;
+var
+  MinIndex, MaxIndex, I: integer;
+
+begin
+
+  Result := ((not Assigned(Array1)) and (not Assigned(Array2))) or (Assigned(Array1) and Assigned(Array2));
+
+  if Result and Assigned(Array1) then
+  begin
+    MinIndex := Low(Array1);
+    MaxIndex := High(Array1);
+    Result := (MinIndex = Low(Array2)) and (MaxIndex = High(Array2));
+    if Result then
+      for I := MinIndex to MaxIndex do
+        if Array1[I] <> Array2[I] then
+          Exit(false);
+  end;
+
+end;
+
+function StringGridColToArray(Grid: TStringGrid; Column: integer = 0): TArray<string>;
+var
+  Rows, I: integer;
+
+begin
+
+  Rows := Grid.RowCount;
+  SetLength(Result, Rows);
+
+  for I := 0 to Rows - 1 do
+    Result[I] := Grid.Cells[Column, I];
+
+end;
+
+procedure ClearRows(StringGrid: TCustomGrid);
+begin
+
+  StringGrid.BeginUpdate;
+  StringGrid.RowCount := 0;
+  StringGrid.EndUpdate;
+
+end;
+
+procedure AddRow(StringGrid: TStringGrid; Value: string); overload;
+begin
+
+    StringGrid.RowCount := StringGrid.RowCount + 1;
+    StringGrid.Cells[0, StringGrid.RowCount - 1] := Value;
+
+end;
+
+procedure AddRow(StringGrid: TStringGrid; Value: TCredentials); overload;
+begin
+
+    StringGrid.RowCount := StringGrid.RowCount + 1;
+    StringGrid.Cells[0, StringGrid.RowCount - 1] := Value[0];
+    StringGrid.Cells[1, StringGrid.RowCount - 1] := Value[1];
+
+end;
 
 function HumanElapsedTime(Milliseconds: Int64; ShowInfo: boolean = true): string;
 var
@@ -121,7 +223,7 @@ end;
 
 procedure DoBruteForce  (
                         var BruteForce: TBruteForce;
-                        ProgressCallback: TProgressCallback;
+                        ProgressCallback: TBFProgressCallback;
                         MaxCount: Int64 = 0;
                         TaskFinishedCallBack: TThreadProcedure = nil
                       );
@@ -164,11 +266,48 @@ begin
 
 end;
 
-procedure TfrmMain.AddRow(StringGrid: TStringGrid; Value: string);
+procedure DoDictionary  (
+                        var BruteForceEx: TBruteForceEx;
+                        ProgressCallback: TDICTProgressCallback;
+                        MaxCount: Int64 = 0;
+                        TaskFinishedCallBack: TThreadProcedure = nil
+                      );
+var
+  Count: Int64;
+  LocalBruteforce: TBruteForceEx;
+  TmpCredentials: TCredentials;
+
 begin
 
-    StringGrid.RowCount := StringGrid.RowCount + 1;
-    StringGrid.Cells[0, StringGrid.RowCount - 1] := Value;
+  try
+    try
+      Count := 0;
+      while (not BruteForceEx.Last) and ((MaxCount = 0) or (Count < MaxCount)) do
+      begin
+        LocalBruteforce := BruteForceEx;
+        TThread.Synchronize (
+                              TThread.CurrentThread,
+                              procedure
+                              begin
+                                ProgressCallback(LocalBruteforce.Next, LocalBruteforce.Total, LocalBruteforce.Done, LocalBruteforce.ToDo);
+                              end
+        );
+        Inc(Count);
+      end;
+    except
+      on E: Exception do
+        TThread.Synchronize (
+                              TThread.CurrentThread,
+                              procedure
+                              begin
+                                ProgressCallback(TmpCredentials, 0, 0, 0, E.Message);
+                              end
+        );
+    end;
+  finally
+      if Assigned(TaskFinishedCallBack) then
+        TThread.Synchronize(TThread.CurrentThread, TaskFinishedCallBack);
+  end;
 
 end;
 
@@ -186,12 +325,89 @@ begin
 
 end;
 
-procedure TfrmMain.ClearRows(StringGrid: TStringGrid);
+procedure TfrmMain.cmdAddPasswordDicClick(Sender: TObject);
 begin
 
-  StringGrid.BeginUpdate;
-  StringGrid.RowCount := 0;
-  StringGrid.EndUpdate;
+  cmdLoadPasswordDic.Enabled := false;
+
+  try
+    LoadRowsFromFile(grdPasswordDict);
+    lblPasswordDicCount.Text := IntTostr(grdPasswordDict.RowCount) + ' items';
+  finally
+    cmdLoadPasswordDic.Enabled := true;
+  end;
+
+end;
+
+procedure TfrmMain.cmdAddUserNameDicClick(Sender: TObject);
+begin
+
+  cmdLoadUserNameDic.Enabled := false;
+
+  try
+    LoadRowsFromFile(grdUsernameDict);
+    lblUserNameDicCount.Text := IntTostr(grdUsernameDict.RowCount) + ' items';
+  finally
+    cmdLoadUserNameDic.Enabled := true;
+  end;
+
+end;
+
+procedure TfrmMain.cmdClearPasswordDicClick(Sender: TObject);
+begin
+
+  cmdClearPasswordDic.Enabled := false;
+
+  try
+    ClearRows(grdPasswordDict);
+    lblPasswordDicCount.Text := IntTostr(grdPasswordDict.RowCount) + ' items';
+  finally
+    cmdClearPasswordDic.Enabled := true;
+  end;
+
+end;
+
+procedure TfrmMain.cmdClearUserNameDicClick(Sender: TObject);
+begin
+
+  cmdClearUserNameDic.Enabled := false;
+
+  try
+    ClearRows(grdUsernameDict);
+    lblUserNameDicCount.Text := IntTostr(grdUsernameDict.RowCount) + ' items';
+  finally
+    cmdClearUserNameDic.Enabled := true;
+  end;
+
+end;
+
+procedure TfrmMain.cmdLoadPasswordDicClick(Sender: TObject);
+begin
+
+  cmdLoadPasswordDic.Enabled := false;
+
+  try
+    ClearRows(grdPasswordDict);
+    LoadRowsFromFile(grdPasswordDict);
+    lblPasswordDicCount.Text := IntTostr(grdPasswordDict.RowCount) + ' items';
+  finally
+    cmdLoadPasswordDic.Enabled := true;
+  end;
+
+end;
+
+procedure TfrmMain.cmdLoadUserNameDicClick(Sender: TObject);
+begin
+
+  cmdLoadUserNameDic.Enabled := false;
+
+  try
+    ClearRows(grdUsernameDict);
+    LoadRowsFromFile(grdUsernameDict);
+    lblUserNameDicCount.Text := IntTostr(grdUsernameDict.RowCount) + ' items';
+  finally
+    cmdLoadUserNameDic.Enabled := true;
+  end;
 
 end;
 
@@ -202,6 +418,16 @@ begin
     Bruteforce.Reset;
 
   ClearRows(grdOutputBT);
+
+end;
+
+procedure TfrmMain.cmdResetDictClick(Sender: TObject);
+begin
+
+  if Assigned(BruteforceDict) then
+    BruteforceDict.Reset;
+
+  ClearRows(grdOutputDICT);
 
 end;
 
@@ -217,7 +443,7 @@ begin
   try
     Application.ProcessMessages;
     cmdStartBT.Enabled := false;
-    TabControl1.Enabled := false;
+    tabMain.Enabled := false;
     Log('Bruteforce start...');
     prgWait.Max := 0;
     prgWait.Value := 0;
@@ -227,13 +453,15 @@ begin
     try
       txtLog.SetFocus;
       Stopwatch := TStopwatch.StartNew;
+      if Assigned(CurrTask) then
+        CurrTask := nil;
       CurrTask := TTask.Create (
                       procedure
                       begin
                         DoBruteForce  (
                                       Bruteforce,
-                                      ProgressCallback,
-                                      StrToInt(txtStoAt.Text),
+                                      BFProgressCallback,
+                                      StrToIntDef(txtStoAt.Text, MaxInt),
                                       TaskFinished
                                     );
                       end
@@ -258,9 +486,78 @@ begin
                     ]
                   ));
       grdOutputBT.EndUpdate;
+      grdOutputBTResized(nil);
       panWait.Visible := false;
-      TabControl1.Enabled := true;
+      tabMain.Enabled := true;
       cmdStartBT.Enabled := true;
+      Application.ProcessMessages;
+    end;
+  except
+    on E: Exception do
+      Log(E.Message, ltError);
+  end;
+
+end;
+
+procedure TfrmMain.cmdStartDICTClick(Sender: TObject);
+var
+  Stopwatch: TStopwatch;
+
+begin
+
+  if not ValidateDictionary then
+    Exit;
+
+  try
+    Application.ProcessMessages;
+    cmdStartDICT.Enabled := false;
+    tabMain.Enabled := false;
+    Log('Dictionary start...');
+    prgWait.Max := 0;
+    prgWait.Value := 0;
+    panWait.Visible := true;
+    Application.ProcessMessages;
+    grdOutputDICT.BeginUpdate;
+    try
+      txtLog.SetFocus;
+      Stopwatch := TStopwatch.StartNew;
+      if Assigned(CurrTask) then
+        CurrTask := nil;
+      CurrTask := TTask.Create (
+                      procedure
+                      begin
+                        DoDictionary  (
+                                      BruteforceDict,
+                                      DICTProgressCallback,
+                                      StrToIntDef(txtStoAt.Text, MaxInt),
+                                      TaskFinished
+                                    );
+                      end
+                    ).Start;
+      while
+            Assigned(CurrTask)
+            and (not  (
+                        CurrTask.Status in  [
+                                              TTaskStatus.Completed,
+                                              TTaskStatus.Canceled,
+                                              TTaskStatus.Exception
+                                            ]
+                      )) do
+        Application.ProcessMessages;
+    finally
+      Log(Format  (
+                    'Completed dictionary for %d passwords on %d in %s',
+                    [
+                      BruteforceDict.Done,
+                      BruteforceDict.Total,
+                      HumanElapsedTime(Trunc(Stopwatch.Elapsed.TotalMilliseconds))
+                    ]
+                  ));
+      grdOutputDICT.EndUpdate;
+      grdOutputDICTResized(nil);
+      panWait.Visible := false;
+      tabMain.Enabled := true;
+      cmdStartDICT.Enabled := true;
       Application.ProcessMessages;
     end;
   except
@@ -282,10 +579,35 @@ begin
 
 end;
 
+procedure TfrmMain.DICTProgressCallback(Password: TCredentials; Total, Done, ToDo: Int64; ErrMsg: string);
+begin
+
+  if Assigned(CurrTask) then
+    CurrTask.CheckCanceled;
+
+  if ErrMsg <> '' then
+  begin
+    Log(ErrMsg, TIoTLogType.ltError);
+    Exit;
+  end;
+
+  if Total > 0 then
+  begin
+    prgWait.Max := Total;
+    prgWait.Value := Done;
+    labWaitDone.Text := Format('Done : %d', [Done]);
+    lblWaitToDo.Text := Format('To do: %d', [ToDo]);
+    lblWaitTotal.Text := Format('Total: %d', [Total]);
+    AddRow(grdOutputDICT, Password);
+    Application.ProcessMessages;
+  end;
+
+end;
+
 procedure TfrmMain.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
 
-  TabControl1.Enabled := false;
+  tabMain.Enabled := false;
   Application.ProcessMessages;
 
   if Assigned(CurrTask) then
@@ -310,9 +632,9 @@ begin
   CurrTask := nil;
   Bruteforce := nil;
   BruteforceDict := nil;
-  BruteforceFile := nil;
-  TabControl1.ActiveTab := TabItem1;
-  txtStoAt.Max := 999999999;
+  tabMain.ActiveTab := tabBruteforce;
+  tabDictionaryBF.ActiveTab := tabUsernameDict;
+  txtStoAt.Max := MaxInt;
 
 end;
 
@@ -348,10 +670,74 @@ begin
 {$ENDIF}
 end;
 
+procedure TfrmMain.FormResize(Sender: TObject);
+begin
+
+  layDictionary.Height := Trunc((Height / 7) * 3);
+  Application.ProcessMessages;
+
+end;
+
 procedure TfrmMain.grdOutputBTResized(Sender: TObject);
 begin
 
   colPassword.Width := grdOutputBT.Width - 20;
+
+end;
+
+procedure TfrmMain.grdOutputDICTResized(Sender: TObject);
+begin
+
+  grdOutputDICT.Columns[0].Width := Trunc((grdOutputDICT.Width - 20) / 2);
+  grdOutputDICT.Columns[1].Width := Trunc((grdOutputDICT.Width - 20) / 2);
+
+end;
+
+procedure TfrmMain.grdPasswordDictResized(Sender: TObject);
+begin
+
+    colPasswordDict.Width := grdUsernameDict.Width - 20;
+
+end;
+
+procedure TfrmMain.grdUsernameDictResized(Sender: TObject);
+begin
+
+    colUsernameDict.Width := grdUsernameDict.Width - 20;
+
+end;
+
+procedure TfrmMain.LoadRowsFromFile(StringGrid: TStringGrid);
+var
+  FileName: string;
+  LoadedRows: TStringList;
+  I: integer;
+
+begin
+
+  FileName := OpenFile();
+
+  if FileExists(FileName) and (FileName <> '') then
+  begin
+    LoadedRows := TStringList.Create;
+    try
+      StringGrid.BeginUpdate;
+      try
+        LoadedRows.BeginUpdate;
+        try
+          LoadedRows.LoadFromFile(FileName);
+        finally
+          LoadedRows.EndUpdate;
+        end;
+        for I := 0 to LoadedRows.Count - 1 do
+          AddRow(StringGrid, LoadedRows.Strings[I]);
+      finally
+        StringGrid.EndUpdate;
+      end;
+    finally
+      LoadedRows.Free;
+    end;
+  end;
 
 end;
 
@@ -376,7 +762,17 @@ begin
 
 end;
 
-procedure TfrmMain.ProgressCallback(Password: string; Total, Done, ToDo: Int64; ErrMsg: string = '');
+function TfrmMain.OpenFile: string;
+begin
+
+  Result := '';
+
+  if dlgOpenFile.Execute then
+    Result := dlgOpenFile.FileName;
+
+end;
+
+procedure TfrmMain.BFProgressCallback(Password: string; Total, Done, ToDo: Int64; ErrMsg: string = '');
 begin
 
   if Assigned(CurrTask) then
@@ -443,8 +839,85 @@ begin
       Bruteforce := TBruteforce.Create(Characters, MinLength, MaxLength);
       ClearRows(grdOutputBT);
     end;
-    if (Bruteforce.Total > txtStoAt.Max) and (StrToInt(txtStoAt.Text) < txtStoAt.Max)  then
-      txtStoAt.Text := FloatToStr(txtStoAt.Max);
+    if Bruteforce.Total > MaxInt then
+      txtStoAt.Text := IntToStr(MaxInt);
+  except
+    on E: Exception do
+    begin
+      Result := false;
+      Log(E.Message, ltError);
+    end;
+  end;
+
+end;
+
+function TfrmMain.ValidateDictionary: boolean;
+var
+  Characters: string;
+  MinLength, MaxLength: smallint;
+  BruteforceTest: TBruteforceEx;
+  UsernameDictionary, PasswordDictionary: TArray<string>;
+
+begin
+
+  Result := true;
+
+  try
+    if chkBruteforce.IsChecked then
+    begin
+      Characters := txtCharacters.Text;
+      MinLength := StrToInt(txtMinLength.Text);
+      MaxLength := StrToInt(txtMaxLength.Text);
+    end
+    else
+    begin
+      Characters := '';
+      MinLength := 0;
+      MaxLength := 0;
+    end;
+    UsernameDictionary := StringGridColToArray(grdUsernameDict);
+    if Length(UsernameDictionary) = 0 then
+      UsernameDictionary := nil;
+    PasswordDictionary := StringGridColToArray(grdPasswordDict);
+    if Length(PasswordDictionary) = 0 then
+      PasswordDictionary := nil;
+    if Assigned(BruteforceDict) then
+    begin
+      if  (Characters <> BruteforceDict.Characters)
+          or (MinLength <> BruteforceDict.MinLength)
+          or (MaxLength <> BruteforceDict.MaxLength)
+          or (not StrArraysEquals(UsernameDictionary, BruteforceDict.UsernameDictionary))
+          or (not StrArraysEquals(PasswordDictionary, BruteforceDict.PasswordDictionary))
+      then
+      begin
+        BruteforceTest := TBruteforceEx.Create  (
+                                                  UsernameDictionary,
+                                                  PasswordDictionary,
+                                                  Characters,
+                                                  MinLength,
+                                                  MaxLength
+                                                );
+        try
+          FreeAndNil(BruteforceDict);
+          Result := ValidateDictionary;
+        finally
+          BruteforceTest.Free;
+        end;
+      end
+    end
+    else
+    begin
+      BruteforceDict := TBruteforceEx.Create  (
+                                                  UsernameDictionary,
+                                                  PasswordDictionary,
+                                                  Characters,
+                                                  MinLength,
+                                                  MaxLength
+                                                );
+      ClearRows(grdOutputDICT);
+    end;
+    if chkBruteforce.IsChecked and (Bruteforce.Total > MaxInt) then
+      txtStoAt.Text := IntToStr(MaxInt);
   except
     on E: Exception do
     begin
