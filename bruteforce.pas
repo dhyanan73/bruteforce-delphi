@@ -287,7 +287,7 @@ begin
   inherited Create;
 
   if (not Assigned(UsernameDictionary)) or (Length(UsernameDictionary) = 0) then
-    raise Exception.Create('PasswordDictionary  must be not empty');
+    raise Exception.Create('UsernameDictionary must be not empty');
 
   FUsernameDic := UsernameDictionary;
   FUsernameDicLen := Length(FUsernameDic);
@@ -297,7 +297,7 @@ begin
 
   if FChars <> '' then
   begin
-    BruteForce := BruteForce.Create(FChars, FMinLen, FMaxLen);
+    BruteForce := TBruteForce.Create(FChars, FMinLen, FMaxLen);
     FTotal := BruteForce.Total;
   end
   else

@@ -69,7 +69,6 @@ object frmMain: TfrmMain
           Touch.InteractiveGestures = [LongTap, DoubleTap]
           Align = Top
           TabOrder = 4
-          Text = 'abcdefghilmnopqrstuvzwyjkx0123456789'
           Position.X = 6.000000000000000000
           Position.Y = 20.000000000000000000
           Size.Width = 388.000000000000000000
@@ -136,7 +135,7 @@ object frmMain: TfrmMain
           TabOrder = 5
           Cursor = crIBeam
           DecimalDigits = 0
-          Max = 1.000000000000000000
+          Max = 2147483008.000000000000000000
           Position.X = 6.000000000000000000
           Position.Y = 146.000000000000000000
           Size.Width = 388.000000000000000000

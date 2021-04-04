@@ -461,7 +461,7 @@ begin
                         DoBruteForce  (
                                       Bruteforce,
                                       BFProgressCallback,
-                                      StrToIntDef(txtStoAt.Text, MaxInt),
+                                      StrToIntDef(txtStoAt.Text, 2147483008),
                                       TaskFinished
                                     );
                       end
@@ -529,7 +529,7 @@ begin
                         DoDictionary  (
                                       BruteforceDict,
                                       DICTProgressCallback,
-                                      StrToIntDef(txtStoAt.Text, MaxInt),
+                                      StrToIntDef(txtStoAt.Text, 2147483008),
                                       TaskFinished
                                     );
                       end
@@ -634,7 +634,6 @@ begin
   BruteforceDict := nil;
   tabMain.ActiveTab := tabBruteforce;
   tabDictionaryBF.ActiveTab := tabUsernameDict;
-  txtStoAt.Max := MaxInt;
 
 end;
 
@@ -688,8 +687,8 @@ end;
 procedure TfrmMain.grdOutputDICTResized(Sender: TObject);
 begin
 
-  grdOutputDICT.Columns[0].Width := Trunc((grdOutputDICT.Width - 20) / 2);
-  grdOutputDICT.Columns[1].Width := Trunc((grdOutputDICT.Width - 20) / 2);
+  grdOutputDICT.Columns[0].Width := Trunc((grdOutputDICT.Width - 22) / 2);
+  grdOutputDICT.Columns[1].Width := Trunc((grdOutputDICT.Width - 22) / 2);
 
 end;
 
@@ -839,8 +838,8 @@ begin
       Bruteforce := TBruteforce.Create(Characters, MinLength, MaxLength);
       ClearRows(grdOutputBT);
     end;
-    if Bruteforce.Total > MaxInt then
-      txtStoAt.Text := IntToStr(MaxInt);
+    if Bruteforce.Total > 2147483008 then
+      txtStoAt.Text := '2147483008';
   except
     on E: Exception do
     begin
@@ -916,8 +915,8 @@ begin
                                                 );
       ClearRows(grdOutputDICT);
     end;
-    if chkBruteforce.IsChecked and (Bruteforce.Total > MaxInt) then
-      txtStoAt.Text := IntToStr(MaxInt);
+    if chkBruteforce.IsChecked and (BruteforceDict.Total > 2147483008) then
+      txtStoAt.Text := '2147483008';
   except
     on E: Exception do
     begin
