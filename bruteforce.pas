@@ -50,6 +50,7 @@ type
     FDone: Int64;
     FToDo: Int64;
     FTotal: Int64;
+    FBackup: boolean;
     property MaxItemsPerFile: Int64 read FMaxItemsPerFile write SetMaxItemsPerFile default 0;
     procedure CreateDictionaryInit  (
                                       Directory, FileName: string;
@@ -101,7 +102,8 @@ type
                                 CreateDictionaryCallback: TCreateDictionaryCallback = nil;
                                 TaskFinishedCallBack: TThreadProcedure = nil;
                                 MaxItems: Int64 = 0;
-                                Shuffle: boolean = true
+                                Shuffle: boolean = true;
+                                Backup: boolean = false
                               );
   end;
 
@@ -140,7 +142,8 @@ type
                                   Callback: TCreateDictionaryCallback = nil;
                                   TaskFinishedCallBack: TThreadProcedure = nil;
                                   MaxItems: Int64 = 0;
-                                  Shuffle: boolean = true
+                                  Shuffle: boolean = true;
+                                  Backup: boolean = false
                                 );
   end;
 
@@ -195,7 +198,7 @@ procedure LoadFileToStringList  (
                                 );
 var
   Total, ToDo, Done: Int64;
-  Reader: TStreamReader;
+  Reader: TextFile;
   Stop: boolean;
   FileName, Line: string;
 
@@ -231,13 +234,14 @@ begin
         raise Exception.Create('File not found')
       else
       begin
-        Reader := TStreamReader.Create(Filename);
+        AssignFile(Reader, FileName);
+        Reset(Reader);
         try
-          while (not Stop) and (Reader.Peek >= 0) do
+          while (not Stop) and (not EOF(Reader)) do
           begin
             if Done >= MaxInt then
               raise Exception.Create(Format('Reached the maximum number (%d) of lines', [MaxInt]));
-            Line := Reader.ReadLine;
+            Readln(Reader, Line);
             TThread.Synchronize (
                                   TThread.CurrentThread,
                                   procedure
@@ -257,7 +261,7 @@ begin
               );
           end;
         finally
-          Reader.Free;
+          CloseFile(Reader);
         end;
         Stop := true;
         if Assigned(ProgressCallback) then
@@ -513,11 +517,13 @@ procedure TBruteForce.CreateDictionary  (
                                           CreateDictionaryCallback: TCreateDictionaryCallback = nil;
                                           TaskFinishedCallBack: TThreadProcedure = nil;
                                           MaxItems: Int64 = 0;
-                                          Shuffle: boolean = true
+                                          Shuffle: boolean = true;
+                                          Backup: boolean = false
                                         );
 begin
 
   try
+    FBackup := Backup;
     if (Shuffle <> FShuffle) or (MaxItems <> MaxItemsPerFile) then
       Reset;
     CreateDictionaryInit(Directory, FileName, CreateDictionaryCallback, MaxItems, Shuffle);
@@ -672,12 +678,6 @@ begin
   ClearDuplicateItems(FUsernameDic, false);
   FUsernameDicLen := Length(FUsernameDic);
 
-{
-  FChars :=  Characters;
-  FMinLen := MinLength;
-  FMaxLen := MaxLength;
-}
-
   if Characters <> '' then
   begin
     BruteForce := TBruteForce.Create(Characters, MinLength, MaxLength);
@@ -714,7 +714,8 @@ procedure TBruteForceEx.CreateDictionary  (
                                             Callback: TCreateDictionaryCallback = nil;
                                             TaskFinishedCallBack: TThreadProcedure = nil;
                                             MaxItems: Int64 = 0;
-                                            Shuffle: boolean = true
+                                            Shuffle: boolean = true;
+                                            Backup: boolean = false
                                           );
 var
   GoOn: boolean;
@@ -723,6 +724,7 @@ var
 begin
 
   try
+    FBackup := Backup;
     if (Shuffle <> FShuffle) or (MaxItems <> MaxItemsPerFile) then
       Reset;
     FileItemSeparator := Separator;
@@ -860,17 +862,9 @@ end;
 { TCustomBruteForce }
 
 function TCustomBruteForce.AddItem(Item: string): boolean;
-//const
-//  MAX_RETRIES = 0;
-
 var
   FilePathName: string;
   Stop: boolean;
-{
-  Retries: integer;
-  IOError: integer;
-  MsgRetries: string;
-}
 
 begin
 
@@ -890,49 +884,7 @@ begin
       FFileItems := 0;
       TThread.Sleep(1000);
     end;
-//    Retries := 0;
-//    repeat
       Writeln(FFileHandler, Item);
-{
-      IOError := IOResult;
-      if IOError = 0 then
-        Retries := 0
-      else
-      begin
-        Inc(Retries);
-        TThread.Sleep(100);
-        if Assigned(FCallback) then
-        begin
-          if Retries <= MAX_RETRIES then
-            MsgRetries := Format('. Retrying #%d...', [Retries])
-          else
-            MsgRetries := '';
-          TThread.Synchronize(
-                          TThread.CurrentThread,
-                          procedure
-                          begin
-                            FCallback (
-                                        FTotal,
-                                        FDone,
-                                        FToDo,
-                                        TotalFiles,
-                                        FilesDone,
-                                        FilesToDo,
-                                        Stop,
-                                        '',
-                                        Format  (
-                                                  '(WARNING) I/O exception #%d raised writing item "%s" (#%d) in file %s at line %d%s',
-                                                  [IOError, Item, FDone, FilePathName, FFileItems + 1, MsgRetries]
-                                                )
-                                      );
-                          end
-          );
-        end;
-      end;
-    until (Retries = 0) or (Retries > MAX_RETRIES);
-    if (MAX_RETRIES > 0) and (Retries > MAX_RETRIES) then
-      raise Exception.Create(Format('[#%d] Failed writing item %s in file %s at line %d', [IOError, Item, FilePathName, FFileItems + 1]));
-}
     FFileItems := FFileItems + 1;
     if FLast or ((MaxItemsPerFile > 0) and (FFileItems >= MaxItemsPerFile)) then
     begin
@@ -957,7 +909,7 @@ begin
                                     );
                         end
         );
-        ShuffleItems(FilePathName, FFileItems, Stop);
+        ShuffleItems(FilePathName, FFileItems, FBackup);
         TThread.Synchronize(
                         TThread.CurrentThread,
                         procedure
@@ -1015,6 +967,7 @@ begin
 
   inherited Create;
   CreateDictionaryReset;
+  FBackup := false;
 
 end;
 
@@ -1037,7 +990,6 @@ end;
 procedure TCustomBruteForce.CreateDictionaryReset;
 begin
 
-//  FDirectory := '';
   FFileName := '';
   FShuffle := true;
   FMaxItemsPerFile := 0;

@@ -149,8 +149,6 @@ type
     procedure TaskFinished;
     function ValidateBruteforce: boolean;
     function ValidateDictionary: boolean;
-    function OpenFile: string;
-    procedure LoadRowsFromFile(StringGrid: TStringGrid);
   public
     procedure CancelTask(Task: ITask);
   end;
@@ -381,29 +379,133 @@ begin
 end;
 
 procedure TfrmMain.cmdAddPasswordDicClick(Sender: TObject);
+var
+  Stopwatch: TStopwatch;
+
 begin
 
-  cmdLoadPasswordDic.Enabled := false;
-
   try
-    LoadRowsFromFile(grdPasswordDict);
-    lblPasswordDicCount.Text := IntTostr(grdPasswordDict.RowCount) + ' items';
-  finally
-    cmdLoadPasswordDic.Enabled := true;
+    Application.ProcessMessages;
+    cmdLoadPasswordDic.Enabled := false;
+    tabMain.Enabled := false;
+    Log('Start adding password dictionary...');
+    labWaitDone.Visible := false;
+    lblWaitToDo.Visible := false;
+    lblWaitTotal.Visible := false;
+    prgWait.Max := 0;
+    prgWait.Value := 0;
+    try
+      txtLog.SetFocus;
+      grdPasswordDict.BeginUpdate;
+      try
+        Stopwatch := TStopwatch.StartNew;
+        if Assigned(CurrTask) then
+          CurrTask := nil;
+        CurrTask := TTask.Create (
+                        procedure
+                        begin
+                          LoadFileToStringList(dlgOpenFile, AddRowToPasswordDict, LoadListCallback, TaskFinished);
+                        end
+                      ).Start;
+        while
+              Assigned(CurrTask)
+              and (not  (
+                          CurrTask.Status in  [
+                                                TTaskStatus.Completed,
+                                                TTaskStatus.Canceled,
+                                                TTaskStatus.Exception
+                                              ]
+                        )) do
+          Application.ProcessMessages;
+      finally
+        grdPasswordDict.EndUpdate;
+      end;
+    finally
+      lblPasswordDicCount.Text := IntTostr(grdPasswordDict.RowCount) + ' items';
+      Log(Format  (
+                    'Added %d rows in password dictionary in %s',
+                    [
+                      grdPasswordDict.RowCount,
+                      HumanElapsedTime(Trunc(Stopwatch.Elapsed.TotalMilliseconds))
+                    ]
+                  ));
+      panWait.Visible := false;
+      labWaitDone.Visible := true;
+      lblWaitToDo.Visible := true;
+      lblWaitTotal.Visible := true;
+      tabMain.Enabled := true;
+      cmdLoadPasswordDic.Enabled := true;
+      Application.ProcessMessages;
+    end;
+  except
+    on E: Exception do
+      Log(E.Message, ltError);
   end;
 
 end;
 
 procedure TfrmMain.cmdAddUserNameDicClick(Sender: TObject);
+var
+  Stopwatch: TStopwatch;
+
 begin
 
-  cmdLoadUserNameDic.Enabled := false;
-
   try
-    LoadRowsFromFile(grdUsernameDict);
-    lblUserNameDicCount.Text := IntTostr(grdUsernameDict.RowCount) + ' items';
-  finally
-    cmdLoadUserNameDic.Enabled := true;
+    Application.ProcessMessages;
+    cmdLoadUserNameDic.Enabled := false;
+    tabMain.Enabled := false;
+    Log('Start adding user name dictionary...');
+    labWaitDone.Visible := false;
+    lblWaitToDo.Visible := false;
+    lblWaitTotal.Visible := false;
+    prgWait.Max := 0;
+    prgWait.Value := 0;
+    try
+      txtLog.SetFocus;
+      grdUsernameDict.BeginUpdate;
+      try
+        Stopwatch := TStopwatch.StartNew;
+        if Assigned(CurrTask) then
+          CurrTask := nil;
+        CurrTask := TTask.Create (
+                        procedure
+                        begin
+                          LoadFileToStringList(dlgOpenFile, AddRowToUserNameDict, LoadListCallback, TaskFinished);
+                        end
+                      ).Start;
+        while
+              Assigned(CurrTask)
+              and (not  (
+                          CurrTask.Status in  [
+                                                TTaskStatus.Completed,
+                                                TTaskStatus.Canceled,
+                                                TTaskStatus.Exception
+                                              ]
+                        )) do
+          Application.ProcessMessages;
+      finally
+        grdUsernameDict.EndUpdate;
+      end;
+    finally
+      lblUserNameDicCount.Text := IntTostr(grdUsernameDict.RowCount) + ' items';
+      Log(Format  (
+                    'Added %d rows in username dictionary in %s',
+                    [
+                      grdUsernameDict.RowCount,
+                      HumanElapsedTime(Trunc(Stopwatch.Elapsed.TotalMilliseconds))
+                    ]
+                  ));
+      panWait.Visible := false;
+      labWaitDone.Visible := true;
+      lblWaitToDo.Visible := true;
+      lblWaitTotal.Visible := true;
+      tabMain.Enabled := true;
+      cmdLoadUserNameDic.Enabled := true;
+      Application.ProcessMessages;
+    end;
+  except
+    on E: Exception do
+      Log(E.Message, ltError);
   end;
 
 end;
@@ -820,7 +922,8 @@ begin
                                                 CreateDictionaryCallback,
                                                 TaskFinished,
                                                 StrToIntDef(txtMaxItems.Text, 2147483008),
-                                                chkShuffle.IsChecked
+                                                chkShuffle.IsChecked,
+                                                chkBackup.IsChecked
                                               );
                         end
                       ).Start;
@@ -895,8 +998,6 @@ procedure TfrmMain.CreateDictionaryCallback (
                                               Msg: string
                                             );
 begin
-
-  Stop := chkBackup.IsChecked;
 
   if Assigned(CurrTask) then
     CurrTask.CheckCanceled;
@@ -1077,40 +1178,6 @@ begin
 
 end;
 
-procedure TfrmMain.LoadRowsFromFile(StringGrid: TStringGrid);
-var
-  FileName: string;
-  LoadedRows: TStringList;
-  I: integer;
-
-begin
-
-  FileName := OpenFile();
-
-  if FileExists(FileName) and (FileName <> '') then
-  begin
-    LoadedRows := TStringList.Create;
-    try
-      StringGrid.BeginUpdate;
-      try
-        LoadedRows.BeginUpdate;
-        try
-          LoadedRows.LoadFromFile(FileName);
-        finally
-          LoadedRows.EndUpdate;
-        end;
-        for I := 0 to LoadedRows.Count - 1 do
-          AddRow(StringGrid, LoadedRows.Strings[I]);
-      finally
-        StringGrid.EndUpdate;
-      end;
-    finally
-      LoadedRows.Free;
-    end;
-  end;
-
-end;
-
 procedure TfrmMain.Log(const Msg: string; LogType: TIoTLogType);
 var
   Log: string;
@@ -1129,16 +1196,6 @@ begin
     txtLog.GoToTextEnd;
     Application.ProcessMessages;
   end;
-
-end;
-
-function TfrmMain.OpenFile: string;
-begin
-
-  Result := '';
-
-  if dlgOpenFile.Execute then
-    Result := dlgOpenFile.FileName;
 
 end;
 
