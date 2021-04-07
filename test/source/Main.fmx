@@ -2,7 +2,7 @@ object frmMain: TfrmMain
   Left = 0
   Top = 0
   Caption = 'Brute Force Test'
-  ClientHeight = 567
+  ClientHeight = 600
   ClientWidth = 400
   Position = ScreenCenter
   FormFactor.Width = 1440
@@ -17,7 +17,7 @@ object frmMain: TfrmMain
     Align = Client
     FullSize = True
     Size.Width = 400.000000000000000000
-    Size.Height = 476.000000000000000000
+    Size.Height = 500.000000000000000000
     Size.PlatformDefault = False
     TabHeight = 49.000000000000000000
     TabIndex = 0
@@ -25,14 +25,139 @@ object frmMain: TfrmMain
     TabPosition = PlatformDefault
     Sizes = (
       400s
-      427s
+      451s
       400s
-      427s
+      451s
       400s
-      427s)
+      451s)
     object tabBruteforce: TTabItem
+      CustomIcon.LoadSize = 1
       CustomIcon = <
         item
+          Width = 96
+          Height = 96
+          PNG = {
+            89504E470D0A1A0A0000000D4948445200000060000000600806000000E29877
+            38000000017352474200AECE1CE90000000467414D410000B18F0BFC61050000
+            0EC449444154785EED9D096C5CC519C7E778EFED6EBC3E769D8B332484722490
+            5629CE4900818F002D49200E6AD5165AAAAA55A1A01E48B454A20715B450283D
+            2908AAAA043B769C541194044A03343420520821B44002491A9238BED7F67AF7
+            BD37D3F9DE8E1D1F7BCC7BBBEBACF1FEA4D8F3CDDAEBF7E63F33DFF7CDCCDBA0
+            22458A142952A4489122458A4C3AB0FC5E30F0C6B5145590350CB19B4C935461
+            0D9914A38FC4851E16AFBE8F19DF8308DD8D077AF7E2CF6EE997BF3661292801
+            F8D6756B2D847EAC2174AEAC4A4907EA606528BC9F70FE0AC6781BB2B5E7C8CA
+            BF1C912F4F180A4200B6F5865339678F108CAF96559EB0197A0B13FE1CB6710B
+            AE6B781963C4E54B05CB4917806D5B776D3C8E1EF3E9A85256E5040B591F52AC
+            DD46AA1B36CBAA82E4A40900733D2B8DFDAAAB3BF0F570388FD7C1D14DB8B6E1
+            0969151C274500BE6579C8B6E9DF68604655BE2FA103A15888A279E48A867DB2
+            AAA020F2FBB8C19A2F3D3D16E9798FFAA7E5BDF18130423E6CA12F48B3E01857
+            01D8E64B66F7F3AE77F4E0F44A84A9ACCD3F0CF38B64B1E018370178E3A5C158
+            7FEB2E83F320F1897E398E70C6CF92C582635C04E01C119346F610CC2A68E054
+            5133BEAEC7E464B62C161CE322407CE3A79FE7666416D6A6206294CBDAF1C32F
+            726B117519D22C28F22E80B971D103C8ECBE0CCAD437D5A93B19F0201F7FE515
+            C8AB00E6A6A597B7B576DDE6185813BDDFDDDCDFD181B88DD03F19E7BFE09CDF
+            29424A61BAA79BA1280E1CEF94664191B7C998372E2CEFC6D12301DB0C804DFD
+            33109D729AF39A0A5D7D0303E5537C3791DAC6A7C066CF5E3F1B63BADF79D125
+            8CB1E769DD862BA55950E46D0498086D1F6C7C80F8D4571A444F8F9707FC6B07
+            1B1F20B54D1F58CC7A579AAEC084FC56160B8EBC0860362FBA8FB39E05D214B3
+            4F8908FBFDD24A0F4C3B21C46E24750D5B64D5101AA277C0EBD25442CC59AFE2
+            EA861669161C391720D6BC647E9BD5FD6D693AB871BE15217E3FA9D9B05E9A23
+            C0758D9B42217C8B10C19255698999A89D70FE95425E15CDB900D81C7826CCED
+            13EF2B325E6284A4911E8B5BFB8811B84B9A4921B54FFD261C621773C46FE718
+            AD82256813598718E3F7C01415E7E8A8483CEEE5CC3EC7C7E939621ADB237FB5
+            20C9A913365B963CCC626DDF94A603F54F13CEF70C69A54774D3CF939A8627A5
+            3929C8D90860CF5C724A7BBCEB1BD21C82186ACE3786D071AC1F6D94E6A42167
+            02D891BECD216E8D783FC7F98AEC57055D04AEF8F2ED4A73FBC7899C08606E5E
+            5EC778EFC5D21C82FAD59DAFF0932FCAE2A4222702F078D763B0E236024C949D
+            AF83CDDF94A54945D602C45B16DFC6ED182C718E20B1ECA0FEF6D86F1E93C549
+            45D6029856DFDDB2380237D38FC37163C29FF1F1425602C49B97DDA1D90365D2
+            1C2291F9AA395F00B25B5CBF212ECD49856701609325C68E244D9AA87FBA2C29
+            12464C96261D9E05B0362DFAA161D312690E016B3EC4A89096329E96993F0E78
+            1620664547ACF70C92E8FDEE12EC1266F6C8E2A4C3930056CBD25B743B1A94E6
+            1098E832FA718746E8A48C80006F02D85D49E77E02AB9E22FE770BE664C21DAA
+            CD15AE5BCB6C59B20A5BE634699E00122FAF7BBE9CBF2D4B930ED70270D6FF33
+            591C01EC78C114E405A1DDA4CC82015702F02DCBE7706BE03C698E80FAC60E0A
+            5530D6B6CBE2A4C39500E680F9801802D23A01D1CB94B71C47635AE820AE7ED2
+            D366FBC701650120F1EAE4BD2BA53902CF73BF80523EA9366046A31CB08BD0F3
+            463B76FC71690E818981F48A79504A54B8C0D9809F6ACF275736ED955523600D
+            8B4FB3757427B7E357C550D7B45EDB08A0AEC41FF287F558092687C5DCF72F6E
+            FAEFF5AD7BF12DE7972618CAAD66362E7C830D3BE93008F5CF4474CA98C55025
+            18679B69ED8655D21CC26C59F6191EEB7B90A3FE3962ECC9DAE16067BD89C066
+            0FD6504717E6E1B06F87C8C07F446A1BB6CA1F9A10280900D3CFB1C6F3CDD13B
+            5E805E7EBE98FF878EFF28E33C3861DB0BC8CAA6FFCA2A14DBB0FC228CFB9BB9
+            D53B3779C38BE9CE08398263E29335A360683B47F6F7485DD3ABB2C61570AFF6
+            A66537D83C76B388F8E677B5F130473C71DFE292CAA6EA118318EF62C3F708BD
+            66C7631867B78EA52480B579D997EC68EB98C77C20ECD42B2E94963B38E6B792
+            EAC687A5E99C256A6BEDFE4E3864A7BC26ADE44C257F034F5056F0F02F89E1FF
+            01BEFC4F03B23A2DACB97ABAC523BFEBE4916B2AECB8D2415E93067AFD5AF076
+            6DF58E4765956B9404309BAAFEC1ACCE4BA53904D1CB91567AB6B4DC11EFF8B7
+            F89ABC972743B5F1876323F63641DA6A52B3FE3D593506F6745599D54F1EEFB0
+            BB57251BE199C1A21D2A5ED4ECDE6A5CBFD7F592BAD21F8CC6BAC6ECF70258F3
+            167A0298AA9F16A781999E222D8AC8BC188AED645BEB6B65D508CC8D8B7EDF7A
+            EC583BB7DAD7786B7C80236676AE3089FF3FBCF102D747E033FED1D8A6159FF2
+            519E62774593DFDD03D1930AF073E0E8BDE2477AA8B3036F61DBEABF28ABD0C0
+            A6E517C49A161C61F18EAF850286F79B1806B722B34DEADF254D65320A4058F4
+            16594C82FA14321A886254A02567800AD2F246388CB4CE76FC047BF6865BCD8D
+            550F751E69DB83AC7EEFAAA6809B9179664BD523D25422E39D71DB5E268B63E1
+            DE8FF1A80800DB9AE06772013C8B8C317F48DCD0ADE91C7DB6B41DEBBE19660D
+            696624A3007D287EA62C8E81DB4A0146528806DB09E9DB81065C6E6D2A907846
+            2147ED8FE9502781F018FE554E0D606CF736CB9FC848DA2B614FD7F9CCC8FE01
+            088E9322A60603C2508F8F9C9A3DEF8A41D42BADB1182191F7E5E17156AB773F
+            62F12E69B923B1E51A16FFCA453975FE836B1A94544E3B02AC58DFC2948D0F70
+            2622806E69B827DDC12DC749E7E959622F4E1D8E586AC1B345E279811395654A
+            3E9D8FDD5120AD0098B08C576A478F8AAFDE9C31F509015239D83C353EE03CAD
+            A98F394D931298B6F4B2739D5EAFCC9C50C6E91D48FB439CE203B29812F0032C
+            EEF1F937E7C1BD9C7E488A324465FF427402AD74AE183133C048D429C25B0F66
+            2F8071CDCBAF8B3830E386B9D5F73F311B99D272070D889B4B320AB81D93A5FC
+            408C32F16753AC2701E29A74D1F86E46CA082A82D90B00603D786D47274D3FC7
+            8870D4EAFD000A09DB054EA295B43732F1B6F93CAD88C528483DFAB4E06CE55C
+            2529117F6E043056BDBCB37246F95D70C1E98068C6EA3D282D77D0C02962B48F
+            CD8C99E92D525125F1991563EFCB092BB3CD3FA23DB9110030D6ECFC2932CA9F
+            96664A58BC1DD9FD87A5E50231DCE994B1E9068B7588AFDE1CBC0A30FA12F9C8
+            48B460F69FED814B7CB91300F0AD79ED6A424A5F93664AEC81632232727FCC07
+            E65A1809C3E12C2EDEEFB8B4F2031E758CD2F10BB988C0627A6E0500F4FA5D55
+            C450104108E0450467D5735483C0FB7875F02A8C76B298A671CC2EE0BEFEDC0B
+            0068AB772DC67A59D23DDCE12444801CC10D1869256789462995B680DB625A03
+            DF929FA9081A7CF8890E9EE4D487274C2D3F02C0169CBE3BB800D3D20F65554A
+            ECE847EE4510FE0036798876420416EF1622E4EFF4E2F05190CDFAD67070406D
+            1E732D0080EFDE6EE9BCF4424EF58C133488C062EDD2524588502662F06161A2
+            3D7054BC4F9BB4720B06473CD85E22A4CE45F8CB4D9A9F113008AEDFDE6B9469
+            B331F267CC96ADBE83A2174344E306988E66210D1EF296899AD577C883989971
+            E2FD611DD61E689525EF601D2B6D4F7A160020B5BBFBF4756FCD217A056CF0A6
+            818B1CE1434F3D98F8A721BDEC3CE917C4FB80983916010E17E061F9002CAD70
+            3BBB51C07D669F2CA6252B0100F009DA9AD71612ADE425599592C44870BF6E04
+            4E522B3DC71911D05856DF0131B541BE9123C72C1C2F67C3973EA0C388CC1E3E
+            2ECA03702A032F69527226590B00C0A791E8D7BFB102FBC21B64554AE0C62057
+            F002F804BD7C9E4894660921BB9015D927BA6BF60FD727EBEDB01605A3D60B06
+            0A46553FA12527020C62ACDE592F4448FA5133C3816CD94B9EE020EE0C565041
+            0838A065C7DB9C65906CB0538C4AD8EB701F4AC3C72EA83F729B53010021C2E7
+            8831F51ED152B2263920004C2530FCBD02DB81B0B9925834F3381D8969269D4F
+            494471EE02082AEE4C1633927301007DCD2BDF277AA8A60393B4AD0B376EF6EC
+            153D58F97A530062A7173C15B0949EA91358FD07C468507F8E10734D7978E745
+            0040BF6EE7B6197AC5FC0ED49B761D81DB716446DE936B3EF95B784B0684C6B0
+            8098119E70CA231D756A30E6CACBC2791300206B76BE33937C22CCA8917E0C8B
+            1E68F71F4266F73BAE7A5A36C0FC0E51993262AA729CBEC2595CC291B2F7CEAB
+            0000246C81B56F571212C8F87134B00C6045DE777C43DE16E0446F76FC4F64BF
+            23BC1B12D7071B4FE9E118EF96C58CE45D8041F4FADD97721ABCAE13A79F9200
+            C73774EF717A1CB7A3B2367BC0999ADD7B6504E66DBA8391C3621956606CACFC
+            D0A137CF950570FE3EDEF8C96710EFAB91559981CD7B9109C3E7CF25221ED5CB
+            E6CEBA0EE40C30DFE76C54619A782E22C9F9D638E2478CEAC6D354F380711760
+            10BEE5E29966EFC00B1C257FEA323558DCB826C66E408812146D011B2870BE56
+            DCAF98A7C1A9231E17F959542EAA790F73D301679A60DF78348CA147695DC357
+            A599919326C0206CF3E2B903FDFD1B7BBAA2F343A1F1BB1E386830757AC9EB98
+            F8FE6061B2C388E128F35997F5F7B5FF3AF569F091C059A1D11BF7A20FAC202B
+            1B5E9266464EBA0083B086D303269DF173D16DAF1331E9CC7CF5DC4EACB1905E
+            FA771DFBBE4C56BF7448560F61362FAB66E6F1ADCE88CA00ECDE69C139D21253
+            3F42BBB49A8685D254A26004180EDBB264961D437789B8FB8A0E163DD3FBC313
+            09A0B7574E9D72006BBEF51AADFC49A6FF816F60FD456D1847954E8C895467C8
+            1770866B48DD53DB1C43918214603466D38AAB10B56A901DAB62C89A1DE791D2
+            BE769F3F5461D3E13D157AB70FD37800A35ECA7D87B966BC49307D8E9A1D0D6E
+            1E1F325B963E28229D6F49332D706C114ECE31CEFF4C6B1B871E025165420830
+            DEC07363AD9148A7CAC873D6A3CACF7B0107EDABC9D226D731F3B8E501130972
+            D5AB3D215AFAAC3433B10F4F895EEBA5F181A20029D071F98D9DD178CACD8668
+            448F12BDF27E63ED9B73C9F2BF4664B56B8A53501ACC9625F7B158DB77C189E3
+            CA1E2B44A6B58BE4632FC6B4415FB5F38FAAC9569122458A142952A448912245
+            8A9C00A1FF033B116671B6CFE8090000000049454E44AE426082}
         end>
       TextSettings.Trimming = Word
       TextSettings.WordWrap = True
@@ -40,7 +165,7 @@ object frmMain: TfrmMain
       Size.Width = 132.000000000000000000
       Size.Height = 49.000000000000000000
       Size.PlatformDefault = False
-      StyleLookup = 'tabitemtoprated'
+      StyleLookup = 'tabitemstyle'
       TabOrder = 0
       Text = 'Bruteforce'
       ExplicitSize.cx = 50.000000000000000000
@@ -63,12 +188,13 @@ object frmMain: TfrmMain
           Size.Height = 16.000000000000000000
           Size.PlatformDefault = False
           Text = 'Characters'
-          TabOrder = 3
+          TabOrder = 8
         end
         object txtCharacters: TEdit
           Touch.InteractiveGestures = [LongTap, DoubleTap]
           Align = Top
-          TabOrder = 4
+          TabOrder = 0
+          MaxLength = 250
           Position.X = 6.000000000000000000
           Position.Y = 20.000000000000000000
           Size.Width = 388.000000000000000000
@@ -85,12 +211,12 @@ object frmMain: TfrmMain
           Size.Height = 16.000000000000000000
           Size.PlatformDefault = False
           Text = 'Min Length'
-          TabOrder = 2
+          TabOrder = 7
         end
         object txtMinLength: TNumberBox
           Touch.InteractiveGestures = [LongTap, DoubleTap]
           Align = Top
-          TabOrder = 7
+          TabOrder = 1
           Cursor = crIBeam
           DecimalDigits = 0
           Min = 1.000000000000000000
@@ -105,7 +231,7 @@ object frmMain: TfrmMain
         object txtMaxLength: TNumberBox
           Touch.InteractiveGestures = [LongTap, DoubleTap]
           Align = Top
-          TabOrder = 6
+          TabOrder = 2
           Cursor = crIBeam
           DecimalDigits = 0
           Min = 1.000000000000000000
@@ -127,12 +253,12 @@ object frmMain: TfrmMain
           Size.Height = 16.000000000000000000
           Size.PlatformDefault = False
           Text = 'Max Length'
-          TabOrder = 1
+          TabOrder = 6
         end
         object txtStoAt: TNumberBox
           Touch.InteractiveGestures = [LongTap, DoubleTap]
           Align = Top
-          TabOrder = 5
+          TabOrder = 3
           Cursor = crIBeam
           DecimalDigits = 0
           Max = 2147483008.000000000000000000
@@ -152,7 +278,7 @@ object frmMain: TfrmMain
           Size.Height = 16.000000000000000000
           Size.PlatformDefault = False
           Text = 'Stop at'
-          TabOrder = 0
+          TabOrder = 5
         end
         object Layout2: TLayout
           Align = MostBottom
@@ -162,7 +288,7 @@ object frmMain: TfrmMain
           Size.Width = 388.000000000000000000
           Size.Height = 40.000000000000000000
           Size.PlatformDefault = False
-          TabOrder = 8
+          TabOrder = 4
           object cmdStartBT: TButton
             Align = Client
             StyledSettings = [Family, Size, FontColor]
@@ -170,7 +296,7 @@ object frmMain: TfrmMain
             Size.Width = 298.000000000000000000
             Size.Height = 30.000000000000000000
             Size.PlatformDefault = False
-            TabOrder = 8
+            TabOrder = 0
             Text = 'GO!'
             TextSettings.Font.StyleExt = {00070000000000000004000000}
             OnClick = cmdStartBTClick
@@ -182,7 +308,7 @@ object frmMain: TfrmMain
             Size.Width = 80.000000000000000000
             Size.Height = 30.000000000000000000
             Size.PlatformDefault = False
-            TabOrder = 9
+            TabOrder = 1
             Text = 'Reset'
             OnClick = cmdResetClick
           end
@@ -197,7 +323,7 @@ object frmMain: TfrmMain
         Margins.Right = 6.000000000000000000
         Margins.Bottom = 6.000000000000000000
         Size.Width = 388.000000000000000000
-        Size.Height = 191.000000000000000000
+        Size.Height = 215.000000000000000000
         Size.PlatformDefault = False
         TextSettings.Font.Family = 'Courier New'
         StyledSettings = [Size, Style, FontColor]
@@ -206,15 +332,49 @@ object frmMain: TfrmMain
         Options = [AlternatingRowBackground, RowLines, RowSelect, AlwaysShowSelection, Tabs, AutoDisplacement]
         OnResized = grdOutputBTResized
         Viewport.Width = 384.000000000000000000
-        Viewport.Height = 187.000000000000000000
+        Viewport.Height = 211.000000000000000000
         object colPassword: TStringColumn
           ReadOnly = True
         end
       end
     end
     object tabDictionary: TTabItem
+      CustomIcon.Height = 120
+      CustomIcon.Width = 120
+      CustomIcon.LoadSize = 2
       CustomIcon = <
         item
+          Width = 96
+          Height = 96
+          PNG = {
+            89504E470D0A1A0A0000000D4948445200000060000000600806000000E29877
+            38000000017352474200AECE1CE90000000467414D410000B18F0BFC61050000
+            02FE49444154785EEDDD3F68136118C7F1E7BD4BDBF8AF915610BBB488E05EBA
+            09A5163741D48A11C145DD441741056942AA82B838E9EED6169C041711A1292E
+            555A2A480715E91FA75A226A9BA6BD7B7D933C20428949EF4D9EDCF5F78136CF
+            FBDE50B86F724986A304000000000000B0A3287EAC8B3BA75F75B6B4B65E52A4
+            4E90A7FB28A60E986DB77C349C3CED7D8991BA9E191F78C95B8138FC689956A9
+            E4C4ED35DDB6A8947A6C329F3427FFA03910EA935FE42AF7B026F5949781590F
+            904E6B2795CC8E9AF161224EF1F26EC428D5CD5360D603F873D947E6E17C7905
+            FF633540FAC2649F7953B9C94BA882D5005A7BB778842A590B903EF7B6C35C1C
+            CFF212AA64EF1510DB1C34BF43FF29A7D1AC05D05A1FE7116A602F80AF8EF008
+            35B0164039748847A881B5001B1BD50550E6736A187E1AC5DA9F4A2527348F15
+            659EFCE0A9B9A5AF2578DADAC858BF957367EF53106C0B020843006108200C01
+            8421803004108600C2104058C3BF094705BE094704020843006108200C018421
+            803004108600C2104018020843006108200C018421803004108600C210401802
+            0843006108200C018421803004108600C2104018020843006108200C01842180
+            3004108600C2104018020843006108200C018421C036E4D737780A0E016A942F
+            1468F6D302AF82ABDB7DC2CAD13434B440FB1339F27DCFEC84F336E23397B77E
+            8E4E2FDD68EEFB84070697A97DDFB239F99B66B5A3EEE1AE49DD02F4747FE709
+            2AA95B00D729F00495D4ED3D60F8418E62315E8458EFB1AF3CFDABE9DF03A03A
+            D60278E4CDF358925FB3F6E28A346B015C723FF358F26D2902D79F06B016406B
+            9AE5B1E4E387169EA0126B011CA5C7792C9979DF42D937715AFD8D4B5125D6CE
+            4EF1BF277973D92953B497B722E1C5E40C4F7FC5DC9F7A6AFEAE9527AFB55740
+            26A37C52FED55FE4ADF25664EDDDD5B5C86360D60214DD1F1D98DE43EEA90279
+            2BBC15398E52D4D1DE36CCCBC0AC0628BA37D6FFBACDA1A39A7446FBFADD3A51
+            8E0F855AF1B2D31EDFBDD2D3D579E5F9D4C567BC0D000000000000003520FA03
+            97039B870CB31F910000000049454E44AE426082}
+          FileName = 'C:\Users\andre\Desktop\book_96px.png'
         end>
       TextSettings.Trimming = Word
       TextSettings.WordWrap = True
@@ -222,7 +382,7 @@ object frmMain: TfrmMain
       Size.Width = 132.000000000000000000
       Size.Height = 49.000000000000000000
       Size.PlatformDefault = False
-      StyleLookup = 'tabitemcontacts'
+      StyleLookup = 'tabitemstyle'
       TabOrder = 0
       Text = 'Dictionary + Bruteforce'
       ExplicitSize.cx = 50.000000000000000000
@@ -236,7 +396,7 @@ object frmMain: TfrmMain
         Margins.Right = 6.000000000000000000
         Margins.Bottom = 6.000000000000000000
         Size.Width = 388.000000000000000000
-        Size.Height = 171.000000000000000000
+        Size.Height = 195.000000000000000000
         Size.PlatformDefault = False
         TextSettings.Font.Family = 'Courier New'
         StyledSettings = [Size, Style, FontColor]
@@ -245,7 +405,7 @@ object frmMain: TfrmMain
         Options = [AlternatingRowBackground, ColumnResize, ColLines, RowLines, RowSelect, AlwaysShowSelection, Tabs, Header, AutoDisplacement]
         OnResized = grdOutputDICTResized
         Viewport.Width = 384.000000000000000000
-        Viewport.Height = 146.000000000000000000
+        Viewport.Height = 170.000000000000000000
         object colOutUsernameDict: TStringColumn
           Header = 'Username'
           ReadOnly = True
@@ -274,7 +434,7 @@ object frmMain: TfrmMain
           Size.Width = 388.000000000000000000
           Size.Height = 40.000000000000000000
           Size.PlatformDefault = False
-          TabOrder = 1
+          TabOrder = 2
           object cmdStartDICT: TButton
             Align = Client
             StyledSettings = [Family, Size, FontColor]
@@ -344,7 +504,7 @@ object frmMain: TfrmMain
               Size.Width = 100.000000000000000000
               Size.Height = 139.000000000000000000
               Size.PlatformDefault = False
-              TabOrder = 0
+              TabOrder = 1
               object cmdAddUserNameDic: TButton
                 Align = Top
                 Margins.Top = 4.000000000000000000
@@ -364,7 +524,7 @@ object frmMain: TfrmMain
                 Size.Width = 92.000000000000000000
                 Size.Height = 22.000000000000000000
                 Size.PlatformDefault = False
-                TabOrder = 3
+                TabOrder = 2
                 Text = 'Clear'
                 OnClick = cmdClearUserNameDicClick
               end
@@ -389,7 +549,7 @@ object frmMain: TfrmMain
                 TextSettings.VertAlign = Trailing
                 TextSettings.Trimming = Word
                 Text = '0 items'
-                TabOrder = 2
+                TabOrder = 3
               end
             end
             object grdUsernameDict: TStringGrid
@@ -404,7 +564,7 @@ object frmMain: TfrmMain
               Size.PlatformDefault = False
               TextSettings.Font.Family = 'Courier New'
               StyledSettings = [Size, Style, FontColor]
-              TabOrder = 1
+              TabOrder = 0
               RowCount = 0
               Options = [AlternatingRowBackground, RowLines, RowSelect, AlwaysShowSelection, Tabs, AutoDisplacement]
               OnResized = grdUsernameDictResized
@@ -445,7 +605,7 @@ object frmMain: TfrmMain
               Size.Width = 100.000000000000000000
               Size.Height = 139.000000000000000000
               Size.PlatformDefault = False
-              TabOrder = 0
+              TabOrder = 1
               object cmdAddPasswordDic: TButton
                 Align = Top
                 Margins.Top = 4.000000000000000000
@@ -454,7 +614,7 @@ object frmMain: TfrmMain
                 Size.Width = 92.000000000000000000
                 Size.Height = 22.000000000000000000
                 Size.PlatformDefault = False
-                TabOrder = 2
+                TabOrder = 1
                 Text = 'Add...'
                 OnClick = cmdAddPasswordDicClick
               end
@@ -466,7 +626,7 @@ object frmMain: TfrmMain
                 Size.Width = 92.000000000000000000
                 Size.Height = 22.000000000000000000
                 Size.PlatformDefault = False
-                TabOrder = 4
+                TabOrder = 2
                 Text = 'Clear'
                 OnClick = cmdClearPasswordDicClick
               end
@@ -506,7 +666,7 @@ object frmMain: TfrmMain
               Size.PlatformDefault = False
               TextSettings.Font.Family = 'Courier New'
               StyledSettings = [Size, Style, FontColor]
-              TabOrder = 1
+              TabOrder = 0
               RowCount = 0
               Options = [AlternatingRowBackground, RowLines, RowSelect, AlwaysShowSelection, Tabs, AutoDisplacement]
               OnResized = grdPasswordDictResized
@@ -526,7 +686,7 @@ object frmMain: TfrmMain
           Size.Width = 388.000000000000000000
           Size.Height = 19.000000000000000000
           Size.PlatformDefault = False
-          TabOrder = 2
+          TabOrder = 1
           Text = 'Bruteforce'
         end
       end
@@ -546,25 +706,212 @@ object frmMain: TfrmMain
       Text = 'Create Dictionary'
       ExplicitSize.cx = 50.000000000000000000
       ExplicitSize.cy = 49.000000000000000000
+      object Layout3: TLayout
+        Align = Client
+        Padding.Left = 6.000000000000000000
+        Padding.Top = 6.000000000000000000
+        Padding.Right = 6.000000000000000000
+        Padding.Bottom = 6.000000000000000000
+        Size.Width = 400.000000000000000000
+        Size.Height = 451.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+        object Label5: TLabel
+          Align = Top
+          AutoSize = True
+          Position.X = 6.000000000000000000
+          Position.Y = 44.000000000000000000
+          Size.Width = 388.000000000000000000
+          Size.Height = 16.000000000000000000
+          Size.PlatformDefault = False
+          Text = 'File Name'
+          TabOrder = 12
+        end
+        object Layout5: TLayout
+          Align = MostTop
+          Position.X = 6.000000000000000000
+          Position.Y = 22.000000000000000000
+          Size.Width = 388.000000000000000000
+          Size.Height = 22.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 13
+          object cmdSelDir: TButton
+            Align = Right
+            Images = ImageList1
+            ImageIndex = 1
+            Position.X = 366.000000000000000000
+            Size.Width = 22.000000000000000000
+            Size.Height = 22.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 1
+            OnClick = cmdSelDirClick
+          end
+          object txtDirectory: TEdit
+            Touch.InteractiveGestures = [LongTap, DoubleTap]
+            Align = Client
+            TabOrder = 0
+            MaxLength = 250
+            Margins.Right = 4.000000000000000000
+            Size.Width = 362.000000000000000000
+            Size.Height = 22.000000000000000000
+            Size.PlatformDefault = False
+          end
+        end
+        object Label6: TLabel
+          Align = MostTop
+          AutoSize = True
+          Position.X = 6.000000000000000000
+          Position.Y = 6.000000000000000000
+          Size.Width = 388.000000000000000000
+          Size.Height = 16.000000000000000000
+          Size.PlatformDefault = False
+          Text = 'Directory'
+          TabOrder = 10
+        end
+        object txtFileName: TEdit
+          Touch.InteractiveGestures = [LongTap, DoubleTap]
+          Align = Top
+          TabOrder = 2
+          MaxLength = 250
+          Position.X = 6.000000000000000000
+          Position.Y = 60.000000000000000000
+          Size.Width = 388.000000000000000000
+          Size.Height = 22.000000000000000000
+          Size.PlatformDefault = False
+        end
+        object txtSeparator: TEdit
+          Touch.InteractiveGestures = [LongTap, DoubleTap]
+          Align = Top
+          TabOrder = 3
+          MaxLength = 250
+          Position.X = 6.000000000000000000
+          Position.Y = 98.000000000000000000
+          Size.Width = 388.000000000000000000
+          Size.Height = 22.000000000000000000
+          Size.PlatformDefault = False
+        end
+        object Label7: TLabel
+          Align = Top
+          AutoSize = True
+          Margins.Left = 2.000000000000000000
+          Position.X = 8.000000000000000000
+          Position.Y = 82.000000000000000000
+          Size.Width = 386.000000000000000000
+          Size.Height = 16.000000000000000000
+          Size.PlatformDefault = False
+          Text = 'User Name / Password Separator'
+          TabOrder = 11
+        end
+        object txtMaxItems: TNumberBox
+          Touch.InteractiveGestures = [LongTap, DoubleTap]
+          Align = Top
+          TabOrder = 4
+          Cursor = crIBeam
+          DecimalDigits = 0
+          Max = 2147483008.000000000000000000
+          Position.X = 6.000000000000000000
+          Position.Y = 140.000000000000000000
+          Size.Width = 388.000000000000000000
+          Size.Height = 22.000000000000000000
+          Size.PlatformDefault = False
+        end
+        object Label8: TLabel
+          Align = Top
+          AutoSize = True
+          Margins.Top = 4.000000000000000000
+          Position.X = 6.000000000000000000
+          Position.Y = 124.000000000000000000
+          Size.Width = 388.000000000000000000
+          Size.Height = 16.000000000000000000
+          Size.PlatformDefault = False
+          Text = 'Maximum Items per File'
+          TabOrder = 9
+        end
+        object chkShuffle: TCheckBox
+          Align = Top
+          IsChecked = True
+          Margins.Top = 6.000000000000000000
+          Position.X = 6.000000000000000000
+          Position.Y = 210.000000000000000000
+          Size.Width = 388.000000000000000000
+          Size.Height = 19.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 6
+          Text = 'Shuffle'
+          OnPaint = chkShufflePaint
+        end
+        object cboData: TComboBox
+          Align = Top
+          Items.Strings = (
+            'Bruteforce'
+            'Dictionary (+ bruteforce)')
+          ItemIndex = 0
+          Position.X = 6.000000000000000000
+          Position.Y = 182.000000000000000000
+          Size.Width = 388.000000000000000000
+          Size.Height = 22.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 5
+        end
+        object Label9: TLabel
+          Align = Top
+          AutoSize = True
+          Margins.Top = 4.000000000000000000
+          Position.X = 6.000000000000000000
+          Position.Y = 166.000000000000000000
+          Size.Width = 388.000000000000000000
+          Size.Height = 16.000000000000000000
+          Size.PlatformDefault = False
+          Text = 'Data'
+          TabOrder = 1
+        end
+        object Layout6: TLayout
+          Align = MostBottom
+          Padding.Top = 10.000000000000000000
+          Margins.Bottom = 4.000000000000000000
+          Position.X = 6.000000000000000000
+          Position.Y = 401.000000000000000000
+          Size.Width = 388.000000000000000000
+          Size.Height = 40.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 8
+          object cmdStartFILE: TButton
+            Align = Client
+            StyledSettings = [Family, Size, FontColor]
+            Margins.Right = 10.000000000000000000
+            Size.Width = 298.000000000000000000
+            Size.Height = 30.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 0
+            Text = 'GO!'
+            TextSettings.Font.StyleExt = {00070000000000000004000000}
+            OnClick = cmdStartFILEClick
+          end
+          object cmdResetFILE: TButton
+            Align = Right
+            Position.X = 308.000000000000000000
+            Position.Y = 10.000000000000000000
+            Size.Width = 80.000000000000000000
+            Size.Height = 30.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 1
+            Text = 'Reset'
+            OnClick = cmdResetFILEClick
+          end
+        end
+        object chkBackup: TCheckBox
+          Align = Top
+          Margins.Left = 20.000000000000000000
+          Position.X = 26.000000000000000000
+          Position.Y = 229.000000000000000000
+          Size.Width = 368.000000000000000000
+          Size.Height = 19.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 7
+          Text = 'Backup'
+        end
+      end
     end
-  end
-  object txtLog: TMemo
-    Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
-    DataDetectorTypes = []
-    ReadOnly = True
-    Align = MostBottom
-    Margins.Left = 6.000000000000000000
-    Margins.Top = 4.000000000000000000
-    Margins.Right = 6.000000000000000000
-    Margins.Bottom = 6.000000000000000000
-    Position.X = 6.000000000000000000
-    Position.Y = 480.000000000000000000
-    Size.Width = 388.000000000000000000
-    Size.Height = 81.000000000000000000
-    Size.PlatformDefault = False
-    TabOrder = 2
-    Viewport.Width = 384.000000000000000000
-    Viewport.Height = 77.000000000000000000
   end
   object panWait: TPanel
     Align = Client
@@ -574,16 +921,20 @@ object frmMain: TfrmMain
     Visible = False
     TabOrder = 3
     object layWait: TLayout
-      Align = Center
-      Size.Width = 300.000000000000000000
+      Align = VertCenter
+      Padding.Left = 10.000000000000000000
+      Padding.Right = 10.000000000000000000
+      Position.Y = 103.000000000000000000
+      Size.Width = 400.000000000000000000
       Size.Height = 270.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 0
       object prgWait: TProgressBar
         Align = Bottom
         Orientation = Horizontal
+        Position.X = 10.000000000000000000
         Position.Y = 200.000000000000000000
-        Size.Width = 300.000000000000000000
+        Size.Width = 380.000000000000000000
         Size.Height = 30.000000000000000000
         Size.PlatformDefault = False
       end
@@ -828,7 +1179,7 @@ object frmMain: TfrmMain
         Align = Client
         Margins.Top = 10.000000000000000000
         Margins.Bottom = 10.000000000000000000
-        Size.Width = 300.000000000000000000
+        Size.Width = 380.000000000000000000
         Size.Height = 77.000000000000000000
         Size.PlatformDefault = False
         object FloatAnimation1: TFloatAnimation
@@ -845,7 +1196,8 @@ object frmMain: TfrmMain
         AutoSize = True
         StyledSettings = []
         Margins.Bottom = 10.000000000000000000
-        Size.Width = 300.000000000000000000
+        Position.X = 10.000000000000000000
+        Size.Width = 380.000000000000000000
         Size.Height = 30.000000000000000000
         Size.PlatformDefault = False
         TextSettings.Font.Family = 'Arial'
@@ -859,8 +1211,9 @@ object frmMain: TfrmMain
       object cmdStop: TButton
         Align = MostBottom
         Margins.Top = 10.000000000000000000
+        Position.X = 10.000000000000000000
         Position.Y = 240.000000000000000000
-        Size.Width = 300.000000000000000000
+        Size.Width = 380.000000000000000000
         Size.Height = 30.000000000000000000
         Size.PlatformDefault = False
         StyleLookup = 'stoptoolbuttonbordered'
@@ -872,8 +1225,9 @@ object frmMain: TfrmMain
         Align = Top
         AutoSize = True
         StyledSettings = [FontColor]
+        Position.X = 10.000000000000000000
         Position.Y = 40.000000000000000000
-        Size.Width = 300.000000000000000000
+        Size.Width = 380.000000000000000000
         Size.Height = 21.000000000000000000
         Size.PlatformDefault = False
         TextSettings.Font.Family = 'Courier New'
@@ -886,8 +1240,9 @@ object frmMain: TfrmMain
         Align = Top
         AutoSize = True
         StyledSettings = [FontColor]
+        Position.X = 10.000000000000000000
         Position.Y = 61.000000000000000000
-        Size.Width = 300.000000000000000000
+        Size.Width = 380.000000000000000000
         Size.Height = 21.000000000000000000
         Size.PlatformDefault = False
         TextSettings.Font.Family = 'Courier New'
@@ -900,8 +1255,9 @@ object frmMain: TfrmMain
         Align = Top
         AutoSize = True
         StyledSettings = [FontColor]
+        Position.X = 10.000000000000000000
         Position.Y = 82.000000000000000000
-        Size.Width = 300.000000000000000000
+        Size.Width = 380.000000000000000000
         Size.Height = 21.000000000000000000
         Size.PlatformDefault = False
         TextSettings.Font.Family = 'Courier New'
@@ -916,18 +1272,57 @@ object frmMain: TfrmMain
     Styles = <
       item
       end>
-    Left = 72
-    Top = 488
+    Left = 16
+    Top = 392
   end
   object dlgOpenFile: TOpenDialog
-    Options = [ofReadOnly, ofHideReadOnly, ofAllowMultiSelect, ofPathMustExist, ofFileMustExist, ofEnableSizing]
-    Left = 16
-    Top = 488
+    Options = [ofReadOnly, ofHideReadOnly, ofPathMustExist, ofFileMustExist, ofEnableSizing]
+    Left = 104
+    Top = 392
+  end
+  object Layout7: TLayout
+    Align = MostBottom
+    Position.Y = 500.000000000000000000
+    Size.Width = 400.000000000000000000
+    Size.Height = 100.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 2
+    object txtLog: TMemo
+      Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+      DataDetectorTypes = []
+      ReadOnly = True
+      Align = Client
+      Margins.Left = 6.000000000000000000
+      Margins.Top = 4.000000000000000000
+      Margins.Bottom = 6.000000000000000000
+      Size.Width = 364.000000000000000000
+      Size.Height = 90.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      Viewport.Width = 360.000000000000000000
+      Viewport.Height = 86.000000000000000000
+    end
+    object cmdClearLog: TButton
+      Align = MostRight
+      Margins.Left = 2.000000000000000000
+      Margins.Top = 4.000000000000000000
+      Margins.Right = 2.000000000000000000
+      Margins.Bottom = 6.000000000000000000
+      Position.X = 372.000000000000000000
+      Position.Y = 4.000000000000000000
+      Size.Width = 26.000000000000000000
+      Size.Height = 90.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = 'stoptoolbuttonbordered'
+      TabOrder = 1
+      Text = 'Stop'
+      OnClick = cmdClearLogClick
+    end
   end
   object GestureManager1: TGestureManager
     Sensitivity = 80.000000000000000000
-    Left = 128
-    Top = 488
+    Left = 200
+    Top = 392
     GestureData = <
       item
         Control = Owner
@@ -939,5 +1334,11 @@ object frmMain: TfrmMain
             GestureID = sgiRight
           end>
       end>
+  end
+  object ImageList1: TImageList
+    Source = <>
+    Destination = <>
+    Left = 16
+    Top = 336
   end
 end

@@ -3,7 +3,8 @@ unit bruteforce;
 interface
 
 uses
-  System.Classes;
+  System.Classes
+  , FMX.Dialogs;
 
 type
 
@@ -13,26 +14,38 @@ type
                                           Total, Done, ToDo: Int64;
                                           TotalFiles, FilesDone, FilesToDo: integer;
                                           var Stop: boolean;
-                                          ErrMsg: string = ''
+                                          ErrMsg: string = '';
+                                          Msg: string = ''
                                         ) of object;
+  TBFProgressCallback = procedure (
+                                    Total, Done, ToDo: Int64;
+                                    var Stop: boolean;
+                                    ErrMsg: string = ''
+                                  ) of object;
+  TBFAddListItemCallback = procedure (Item: string) of object;
 
   TCustomBruteForce = class
-  private
+  strict private
     FFileItems: Int64;
     FFileHandler: TextFile;
     FDirectory: string;
     FFileName: string;
-    FShuffle: boolean;
     FMaxItemsPerFile: Int64;
     FTotalFiles: integer;
     FFilesToDo: integer;
     FFilesDone: integer;
     FCallback: TCreateDictionaryCallback;
     FFileIndexDigits: smallint;
+    function GetDirectory: string;
+    function GetFileName: string;
+    function GetTotalFiles: integer;
+    function GetFilesToDo: integer;
+    function GetFilesDone: integer;
     procedure SetDirectory(Value: string);
     procedure SetMaxItemsPerFile(const Value: Int64);
     function GetNewFileName: string;
-  protected
+  private
+    FShuffle: boolean;
     FLast: boolean;
     FDone: Int64;
     FToDo: Int64;
@@ -44,71 +57,71 @@ type
                                       MaxItems: Int64;
                                       Shuffle: boolean
                                     );
-    function AddItem(const Item: string): boolean;
+    function AddItem(Item: string): boolean;
   public
     constructor Create;
     destructor Destroy; override;
-    property FileDirectory: string read FDirectory;
-    property FileName: string read FFileName;
-    property TotalFiles: integer read FTotalFiles default 1;
-    property FilesToDo: integer read FFilesToDo default 0;
-    property FilesDone: integer read FFilesDone default 0;
-    property MaxFileItems: Int64 read FMaxItemsPerFile default 0;
+    property FileDirectory: string read GetDirectory write SetDirectory;
+    property FileName: string read GetFileName;
+    property TotalFiles: integer read GetTotalFiles default 0;
+    property FilesToDo: integer read GetFilesToDo default 0;
+    property FilesDone: integer read GetFilesDone default 0;
     procedure CreateDictionaryReset;
   end;
 
   TBruteForce = class(TCustomBruteForce)
-  private
+  strict private
     FChars: string;
     FCharsLen: smallint;
     FMinLen: smallint;
     FMaxLen: smallint;
     FCounters: TArray<smallint>;
+  private
+    function GetMinLength: smallint; virtual;
+    function GetMaxLength: smallint; virtual;
+    function GetCharacters: string; virtual;
+    function GetLast: boolean;
+    function GetTotal: Int64;
+    function GetDone: Int64;
+    function GetToDo: Int64;
   public
-    property Last: boolean read FLast default false;
-    property Total: Int64 read FTotal default 0;
-    property Done: Int64 read FDone default 0;
-    property ToDo: Int64 read FToDo default 0;
-    property Characters: string read FChars;
-    property MinLength: smallint read FMinLen default 0;
-    property MaxLength: smallint read FMaxLen default 0;
+    property Last: boolean read GetLast default false;
+    property Total: Int64 read GetTotal default 0;
+    property Done: Int64 read GetDone default 0;
+    property ToDo: Int64 read GetToDo default 0;
+    property Characters: string read GetCharacters;
+    property MinLength: smallint read GetMinLength default 0;
+    property MaxLength: smallint read GetMaxLength default 0;
     constructor Create (Characters: string; MinLength, MaxLength: TCredentialLength);
     destructor Destroy; override;
     function Next: string;
-    procedure Reset;
+    procedure Reset; virtual;
     procedure CreateDictionary(
                                 Directory, FileName: string;
-                                Callback: TCreateDictionaryCallback = nil;
+                                CreateDictionaryCallback: TCreateDictionaryCallback = nil;
                                 TaskFinishedCallBack: TThreadProcedure = nil;
                                 MaxItems: Int64 = 0;
                                 Shuffle: boolean = true
                               );
   end;
 
-  TBruteForceEx = class(TCustomBruteForce)
+  TBruteForceEx = class(TBruteForce)
   private
     FUsernameDic: TArray<string>;
     FPasswordDic: TArray<string>;
-    FChars: string;
-    FMinLen: smallint;
-    FMaxLen: smallint;
     FUsernameDicCount: Int64;
     FPasswordDicCount: Int64;
     BruteForce: TBruteForce;
     FUsernameDicLen: Int64;
     FPasswordDicLen: Int64;
     FSeparator: string;
+    function GetMinLength: smallint; override;
+    function GetMaxLength: smallint; override;
+    function GetCharacters: string; override;
     procedure SetSeparator(Value: string);
   protected
     property FileItemSeparator: string read FSeparator write SetSeparator;
   public
-    property Last: boolean read FLast default false;
-    property Total: Int64 read FTotal default 0;
-    property Done: Int64 read FDone default 0;
-    property ToDo: Int64 read FToDo default 0;
-    property Characters: string read FChars;
-    property MinLength: smallint read FMinLen default 0;
-    property MaxLength: smallint read FMaxLen default 0;
     property UsernameDictionary: TArray<string> read FUsernameDic;
     property PasswordDictionary: TArray<string> read FPasswordDic;
     constructor Create  (
@@ -120,7 +133,7 @@ type
                         );
     destructor Destroy; override;
     function Next: TCredentials;
-    procedure Reset;
+    procedure Reset; override;
     procedure CreateDictionary  (
                                   Directory, FileName: string;
                                   var Separator: string;
@@ -131,12 +144,237 @@ type
                                 );
   end;
 
+  procedure LoadFileToStringList  (
+                                    dlgOpenFile: TOpenDialog;
+                                    AddListItemCallback: TBFAddListItemCallback;
+                                    ProgressCallback: TBFProgressCallback = nil;
+                                    TaskFinishedCallBack: TThreadProcedure = nil
+                                  );
+
 implementation
 
 uses
   System.SysUtils
   , System.Math
-  , System.StrUtils;
+  , System.StrUtils
+  , System.IOUtils;
+
+{$IFDEF VER230}
+  {$DEFINE USE_TSEARCHREC_SIZE}
+{$ELSE}
+  {$IFNDEF MSWINDOWS}
+    {$DEFINE USE_TSEARCHREC_SIZE}
+  {$ENDIF}
+{$ENDIF}
+
+function GetFileSize(fileName: String): Int64;
+var
+  sr : TSearchRec;
+
+begin
+
+  if FindFirst(fileName, faAnyFile, sr ) = 0 then
+  begin
+    {$IFDEF USE_TSEARCHREC_SIZE}
+    Result := sr.Size;
+    {$ELSE}
+    Result := (Int64(sr.FindData.nFileSizeHigh) shl 32) + sr.FindData.nFileSizeLow;
+    {$ENDIF}
+    FindClose(sr);
+  end
+  else
+     Result := -1;
+
+end;
+
+procedure LoadFileToStringList  (
+                                  dlgOpenFile: TOpenDialog;
+                                  AddListItemCallback: TBFAddListItemCallback;
+                                  ProgressCallback: TBFProgressCallback = nil;
+                                  TaskFinishedCallBack: TThreadProcedure = nil
+                                );
+var
+  Total, ToDo, Done: Int64;
+  Reader: TStreamReader;
+  Stop: boolean;
+  FileName, Line: string;
+
+begin
+
+  try
+    Stop := false;
+    Total := 0;
+    ToDo := 0;
+    Done := 0;
+    FileName := '';
+    if dlgOpenFile.Execute then
+      FileName := dlgOpenFile.FileName;
+    if (not FileExists(FileName)) or (FileName = '') then
+    begin
+      if Assigned(ProgressCallback) then
+      begin
+        Stop := true;
+        TThread.Synchronize (
+                              TThread.CurrentThread,
+                              procedure
+                              begin
+                                ProgressCallback(Total, Done, ToDo, Stop);
+                              end
+        );
+      end;
+      Exit;
+    end;
+    try
+      Total := GetFileSize(FileName);
+      ToDo := Total;
+      if Total < 0 then
+        raise Exception.Create('File not found')
+      else
+      begin
+        Reader := TStreamReader.Create(Filename);
+        try
+          while (not Stop) and (Reader.Peek >= 0) do
+          begin
+            if Done >= MaxInt then
+              raise Exception.Create(Format('Reached the maximum number (%d) of lines', [MaxInt]));
+            Line := Reader.ReadLine;
+            TThread.Synchronize (
+                                  TThread.CurrentThread,
+                                  procedure
+                                  begin
+                                    AddListItemCallback(Line);
+                                  end
+            );
+            Done := Done + Length(Line);
+            ToDo := ToDo + Length(Line);
+            if Assigned(ProgressCallback) then
+              TThread.Synchronize (
+                                    TThread.CurrentThread,
+                                    procedure
+                                    begin
+                                      ProgressCallback(Total, Done, ToDo, Stop);
+                                    end
+              );
+          end;
+        finally
+          Reader.Free;
+        end;
+        Stop := true;
+        if Assigned(ProgressCallback) then
+          TThread.Synchronize (
+                                TThread.CurrentThread,
+                                procedure
+                                begin
+                                  ProgressCallback(Total, Done, ToDo, Stop);
+                                end
+          );
+      end;
+    except
+      on E: Exception do
+      begin
+        if Assigned(ProgressCallback) then
+        begin
+          Stop := true;
+          TThread.Synchronize (
+                                TThread.CurrentThread,
+                                procedure
+                                begin
+                                  ProgressCallback(Total, Done, ToDo, Stop, E.Message);
+                                end
+          );
+        end;
+      end;
+    end;
+  finally
+      if Assigned(TaskFinishedCallBack) then
+        TThread.Synchronize(TThread.CurrentThread, TaskFinishedCallBack);
+  end;
+
+end;
+
+procedure ClearDuplicateItems(var Items: TArray<string>; CaseSensitive: boolean = true); overload;
+var
+  i, x: Int64;
+  Done: boolean;
+
+begin
+
+  i := 0;
+  Done := false;
+
+  while not Done do
+  begin
+    if i <= High(Items) then
+    begin
+      for x := High(Items) downto i + 1  do
+        if CaseSensitive then
+        begin
+          if Items[x] = Items[i] then
+            Delete(Items, x, 1);
+        end
+        else
+          if UpperCase(Items[x]) = UpperCase(Items[i]) then
+            Delete(Items, x, 1);
+      i := i + 1;
+    end
+    else
+      Done := true;
+  end;
+
+end;
+
+procedure ClearDuplicateItems(var Items: string; CaseSensitive: boolean = true); overload;
+var
+  i, x: Int64;
+  Done: boolean;
+
+begin
+
+  i := 1;
+  Done := false;
+
+  while not Done do
+  begin
+    if i <= Length(Items) then
+    begin
+      for x := Length(Items) downto i + 1  do
+        if CaseSensitive then
+        begin
+          if Items[x] = Items[i] then
+            Delete(Items, x, 1);
+        end
+        else
+          if UpperCase(Items[x]) = UpperCase(Items[i]) then
+            Delete(Items, x, 1);
+      i := i + 1;
+    end
+    else
+      Done := true;
+  end;
+
+end;
+
+
+function ModInt64(Val1: Int64; Val2: Int64): Int64;
+begin
+
+  Result := 0;
+
+  if (Val1 <= MaxInt) and (Val2 <= MaxInt) then
+    exit(Val1 mod Val2);
+
+  if (Val1 > 0) and (Val2 > 0) then
+    Result := Abs(Val1 - (Trunc(Val1 / Val2) * Val2));
+
+  if Result >= Val2 then
+  begin
+    if (Result <= MaxInt) and (Val2 <= MaxInt) then
+      exit(Result mod Val2);
+    Result := Val2 - 1;
+  end;
+
+
+end;
 
 function RandU64: UInt64; { https://en.delphipraxis.net/topic/3739-random-unsigned-64-bit-integers/ }
 begin
@@ -146,6 +384,97 @@ begin
   Result := (Result shl 16) or UInt64(Random($10000));
   Result := (Result shl 16) or UInt64(Random($10000));
   Result := (Result shl 16) or UInt64(Random($10000));
+
+end;
+
+procedure ShuffleItems(FileName: string; NIntems: Int64; Backup: boolean = false);
+var
+  SourceStream: TFileStream;
+  Writer: TStreamWriter;
+  ShuffleFileName, Line: String;
+  ProcessedIntems, LineToProcess, LinePos: Int64;
+  Character: char;
+begin
+
+  if Backup then
+    TFile.Copy(FileName, FileName + '.bck', true);
+
+  ShuffleFileName := IncludeTrailingPathDelimiter(TPath.GetDirectoryName(FileName))
+                      + TPath.GetGUIDFileName() + '_'
+                      + TPath.ChangeExtension(TPath.GetFileName(Filename), '.shuffle');
+  SourceStream := TFileStream.Create(FileName, fmOpenReadWrite);
+  Writer := TStreamWriter.Create(ShuffleFileName, false);
+
+  try
+//    Writer.AutoFlush := true;
+    ProcessedIntems := 0;
+    LinePos := 1;
+    while ProcessedIntems < NIntems do
+    begin
+    // Select random line to process
+      LineToProcess := ModInt64(Abs(RandU64), NIntems) + 1;
+    // Moving to begin of line to process
+      while LinePos <> LineToProcess do
+      begin
+        if LineToProcess < LinePos then
+        begin
+          SourceStream.Seek(0, TSeekOrigin.soBeginning);
+          LinePos := 1;
+          Continue;
+        end;
+        repeat
+        SourceStream.Read(Character, 1);
+        until (Character = #13) or (Character = #10);
+        SourceStream.Read(Character, 1);
+        if (Character <> #13) and (Character <> #10) then
+          SourceStream.Seek(Length(Character) * (-1), TSeekOrigin.soCurrent);
+        LinePos := LinePos + 1;
+      end;
+    // Get line or discard it if marked as processed (starting with #9 char)
+      SourceStream.Read(Character, 1);
+      if Character = #9 then
+      begin
+        SourceStream.Seek(-1, TSeekOrigin.soCurrent);
+        Continue;
+      end;
+      Line := '';
+      while (Character <> #13) and (Character <> #10) do
+      begin
+        Line := Line + Character;
+        SourceStream.Read(Character, 1);
+      end;
+    // Add line to shuffle file
+      Writer.WriteLine(Line);
+    // Mark line as processed overwriting first char with horizontal tab (#9)
+      SourceStream.Seek((Length(Line) * (-1)) - Length(Character), TSeekOrigin.soCurrent);
+      Character := #9;
+      SourceStream.Write(Character, 1);
+    // If not is last last line then move to next line, otherwise move at line begin
+      if LineToProcess < NIntems then
+      begin
+        SourceStream.Seek(Length(Line), TSeekOrigin.soCurrent);
+        SourceStream.Read(Character, 1);
+        if (Character <> #13) and (Character <> #10) then
+          SourceStream.Seek(Length(Character) * (-1), TSeekOrigin.soCurrent);
+        LinePos := LinePos + 1;
+      end
+      else
+        SourceStream.Seek(Length(Character) * (-1), TSeekOrigin.soCurrent);
+    // Increment processed lines counter
+      ProcessedIntems := ProcessedIntems + 1;
+    end;
+  finally
+    SourceStream.Free;
+    Writer.Free;
+  end;
+
+  TFile.Delete(FileName);
+  TFile.Move(ShuffleFileName, FileName);
+
+{ POSIX: trying to move a file may actually copy it if destination directory is
+  a mount point for another partition. }
+  if FileExists(ShuffleFileName) then
+    TFile.Delete(FileName);
 
 end;
 
@@ -166,6 +495,7 @@ begin
     raise Exception.Create('MaxLength must be greater than or equal to MinLength');
 
   FChars := Characters;
+  ClearDuplicateItems(FChars);
   FCharsLen := Length(FChars);
   FMinLen := MinLength;
   FMaxLen := MaxLength;
@@ -180,7 +510,7 @@ end;
 
 procedure TBruteForce.CreateDictionary  (
                                           Directory, FileName: string;
-                                          Callback: TCreateDictionaryCallback = nil;
+                                          CreateDictionaryCallback: TCreateDictionaryCallback = nil;
                                           TaskFinishedCallBack: TThreadProcedure = nil;
                                           MaxItems: Int64 = 0;
                                           Shuffle: boolean = true
@@ -188,7 +518,9 @@ procedure TBruteForce.CreateDictionary  (
 begin
 
   try
-    CreateDictionaryInit(Directory, FileName, Callback, MaxItems, Shuffle);
+    if (Shuffle <> FShuffle) or (MaxItems <> MaxItemsPerFile) then
+      Reset;
+    CreateDictionaryInit(Directory, FileName, CreateDictionaryCallback, MaxItems, Shuffle);
     while (not Last) and AddItem(Next) do
   finally
     if Assigned(TaskFinishedCallBack) then
@@ -203,6 +535,55 @@ begin
   inherited;
   SetLength(FCounters, 0);
   FCounters := nil;
+
+end;
+
+function TBruteForce.GetCharacters: string;
+begin
+
+  Result := FChars;
+
+end;
+
+function TBruteForce.GetDone: Int64;
+begin
+
+  Result := FDone;
+
+end;
+
+function TBruteForce.GetLast: boolean;
+begin
+
+  Result := FLast;
+
+end;
+
+function TBruteForce.GetMaxLength: smallint;
+begin
+
+  Result := FMaxLen;
+
+end;
+
+function TBruteForce.GetMinLength: smallint;
+begin
+
+  Result := FMinLen;
+
+end;
+
+function TBruteForce.GetToDo: Int64;
+begin
+
+  Result := FToDo;
+
+end;
+
+function TBruteForce.GetTotal: Int64;
+begin
+
+  Result := FTotal;
 
 end;
 
@@ -284,20 +665,22 @@ constructor TBruteForceEx.Create  (
                                   );
 begin
 
-  inherited Create;
-
   if (not Assigned(UsernameDictionary)) or (Length(UsernameDictionary) = 0) then
     raise Exception.Create('UsernameDictionary must be not empty');
 
   FUsernameDic := UsernameDictionary;
+  ClearDuplicateItems(FUsernameDic, false);
   FUsernameDicLen := Length(FUsernameDic);
+
+{
   FChars :=  Characters;
   FMinLen := MinLength;
   FMaxLen := MaxLength;
+}
 
-  if FChars <> '' then
+  if Characters <> '' then
   begin
-    BruteForce := TBruteForce.Create(FChars, FMinLen, FMaxLen);
+    BruteForce := TBruteForce.Create(Characters, MinLength, MaxLength);
     FTotal := BruteForce.Total;
   end
   else
@@ -311,6 +694,7 @@ begin
   if Assigned(PasswordDictionary) then
   begin
     FPasswordDic := PasswordDictionary;
+    ClearDuplicateItems(FPasswordDic);
     FPasswordDicLen := Length(FPasswordDic);
   end
   else
@@ -339,6 +723,8 @@ var
 begin
 
   try
+    if (Shuffle <> FShuffle) or (MaxItems <> MaxItemsPerFile) then
+      Reset;
     FileItemSeparator := Separator;
     CreateDictionaryInit(Directory, FileName, Callback, MaxItems, Shuffle);
     Separator := FileItemSeparator;
@@ -365,6 +751,36 @@ begin
   SetLength(FPasswordDic, 0);
   FPasswordDic := nil;
 
+
+end;
+
+function TBruteForceEx.GetCharacters: string;
+begin
+
+  if Assigned(Bruteforce) then
+    Result := Bruteforce.Characters
+  else
+    Result := '';
+
+end;
+
+function TBruteForceEx.GetMaxLength: smallint;
+begin
+
+  if Assigned(Bruteforce) then
+    Result := Bruteforce.MaxLength
+  else
+    Result := 0;
+
+end;
+
+function TBruteForceEx.GetMinLength: smallint;
+begin
+
+  if Assigned(Bruteforce) then
+    Result := Bruteforce.MinLength
+  else
+    Result := 0;
 
 end;
 
@@ -443,47 +859,132 @@ end;
 
 { TCustomBruteForce }
 
-function TCustomBruteForce.AddItem(const Item: string): boolean;
+function TCustomBruteForce.AddItem(Item: string): boolean;
+//const
+//  MAX_RETRIES = 0;
+
 var
-  FilePathName, Line: string;
+  FilePathName: string;
   Stop: boolean;
-  Index: Int64;
+{
+  Retries: integer;
+  IOError: integer;
+  MsgRetries: string;
+}
 
 begin
 
 {$I-}
 
+  Stop := false;
+
   try
-    if (FFilesDone = 0) or ((MaxItemsPerFile > 0) and (FFileItems >= MaxItemsPerFile)) then
+    FilePathName := FileDirectory + GetNewFileName;
+    if (FFileItems = 0) or ((MaxItemsPerFile > 0) and (FFileItems >= MaxItemsPerFile)) then
     begin
       CloseFile(FFileHandler);
-      FilePathName := FileDirectory + GetNewFileName;
+      TThread.Sleep(1000);
       AssignFile(FFileHandler, FilePathName);
       ReWrite(FFileHandler);
+      IOResult;
       FFileItems := 0;
-      Index := -1
-    end
-    else
-    begin
-      if FShuffle then
-      begin
-        Randomize;
-        Index := (Abs(RandU64) mod FFileItems);
-      end
-      else
-        Index := -1;
+      TThread.Sleep(1000);
     end;
-    while (not EOF(FFileHandler)) and (Index <> 0) do
-      Readln(FFileHandler, Line);
-    Writeln(FFileHandler, Item);
+//    Retries := 0;
+//    repeat
+      Writeln(FFileHandler, Item);
+{
+      IOError := IOResult;
+      if IOError = 0 then
+        Retries := 0
+      else
+      begin
+        Inc(Retries);
+        TThread.Sleep(100);
+        if Assigned(FCallback) then
+        begin
+          if Retries <= MAX_RETRIES then
+            MsgRetries := Format('. Retrying #%d...', [Retries])
+          else
+            MsgRetries := '';
+          TThread.Synchronize(
+                          TThread.CurrentThread,
+                          procedure
+                          begin
+                            FCallback (
+                                        FTotal,
+                                        FDone,
+                                        FToDo,
+                                        TotalFiles,
+                                        FilesDone,
+                                        FilesToDo,
+                                        Stop,
+                                        '',
+                                        Format  (
+                                                  '(WARNING) I/O exception #%d raised writing item "%s" (#%d) in file %s at line %d%s',
+                                                  [IOError, Item, FDone, FilePathName, FFileItems + 1, MsgRetries]
+                                                )
+                                      );
+                          end
+          );
+        end;
+      end;
+    until (Retries = 0) or (Retries > MAX_RETRIES);
+    if (MAX_RETRIES > 0) and (Retries > MAX_RETRIES) then
+      raise Exception.Create(Format('[#%d] Failed writing item %s in file %s at line %d', [IOError, Item, FilePathName, FFileItems + 1]));
+}
     FFileItems := FFileItems + 1;
     if FLast or ((MaxItemsPerFile > 0) and (FFileItems >= MaxItemsPerFile)) then
     begin
       CloseFile(FFileHandler);
+      TThread.Sleep(1000);
+      if FShuffle then
+      begin
+        TThread.Synchronize(
+                        TThread.CurrentThread,
+                        procedure
+                        begin
+                          FCallback (
+                                      FTotal,
+                                      FDone,
+                                      FToDo,
+                                      TotalFiles,
+                                      FilesDone,
+                                      FilesToDo,
+                                      Stop,
+                                      '',
+                                      'Starting to shuffle the file ' + FilePathName + '...'
+                                    );
+                        end
+        );
+        ShuffleItems(FilePathName, FFileItems, Stop);
+        TThread.Synchronize(
+                        TThread.CurrentThread,
+                        procedure
+                        begin
+                          FCallback (
+                                      FTotal,
+                                      FDone,
+                                      FToDo,
+                                      TotalFiles,
+                                      FilesDone,
+                                      FilesToDo,
+                                      Stop,
+                                      '',
+                                      'Shuffling of the file ' + FilePathName + ' completed'
+                                    );
+                        end
+        );
+      end;
       FFilesToDo := FFilesToDo - 1;
       FFilesDone := FFilesDone + 1;
     end;
-    Stop := FLast;
+    Stop := Stop or FLast;
+    if Stop then
+    begin
+      CloseFile(FFileHandler);
+      TThread.Sleep(1000);
+    end;
     TThread.Synchronize(
                     TThread.CurrentThread,
                     procedure
@@ -492,13 +993,10 @@ begin
                     end
     );
     Result := not Stop;
-    if (not Result) or FLast then
-      CloseFile(FFileHandler);
   except
     on E: Exception do
     begin
       Result := false;
-      CloseFile(FFileHandler);
       if Assigned(FCallback) then
         TThread.Synchronize(
                         TThread.CurrentThread,
@@ -531,26 +1029,27 @@ begin
   SetDirectory(Directory);
   MaxItemsPerFile := MaxItems;
   FFileName := FileName;
-  FShuffle := Shuffle;
   FCallback := Callback;
+  FShuffle := Shuffle;
 
 end;
 
 procedure TCustomBruteForce.CreateDictionaryReset;
 begin
 
-  self.FDirectory := '';
+//  FDirectory := '';
   FFileName := '';
   FShuffle := true;
   FMaxItemsPerFile := 0;
-  FTotalFiles := 1;
-  FFilesToDo := 1;
+  FTotalFiles := 0;
+  FFilesToDo := 0;
   FFilesDone := 0;
   FCallback := nil;
   FFileIndexDigits := 0;
   FFileItems := 0;
 
 {$I-}
+
   CloseFile(FFileHandler);
 
 end;
@@ -560,25 +1059,69 @@ begin
 
   inherited;
 
+
 {$I-}
+
   CloseFile(FFileHandler);
 
 end;
 
+function TCustomBruteForce.GetDirectory: string;
+begin
+
+  Result := FDirectory;
+
+end;
+
+function TCustomBruteForce.GetFileName: string;
+begin
+
+  Result := FFileName;
+
+end;
+
+function TCustomBruteForce.GetFilesDone: integer;
+begin
+
+  Result := FFilesDone;
+
+end;
+
+function TCustomBruteForce.GetFilesToDo: integer;
+begin
+
+  Result := FFilesToDo;
+
+end;
+
 function TCustomBruteForce.GetNewFileName: string;
+var
+  FileExt: string;
+
 begin
 
   Result := FFileName;
 
   if FTotalFiles > 1 then
-    Result := Format('%s_%.*d', [Result, FFileIndexDigits, FFilesDone]);
+  begin
+    FileExt := TPath.GetExtension(Result);
+    Result := TPath.GetFileNameWithoutExtension(Result);
+    Result := Format('%s_%.*d', [Result, FFileIndexDigits, FFilesDone]) + FileExt;
+  end;
+
+end;
+
+function TCustomBruteForce.GetTotalFiles: integer;
+begin
+
+  Result := FTotalFiles
 
 end;
 
 procedure TCustomBruteForce.SetDirectory(Value: string);
 begin
 
-  if not DirectoryExists(Value) then
+  if (Value <> '') and (not DirectoryExists(Value)) then
     raise Exception.Create('Directory not found');
 
   Value := IncludeTrailingPathDelimiter(Value);
@@ -591,19 +1134,22 @@ end;
 procedure TCustomBruteForce.SetMaxItemsPerFile(const Value: Int64);
 begin
 
-  if Value <> FMaxItemsPerFile then
+  CreateDictionaryReset;
+
+  if FTotal > 0 then
+    FTotalFiles := 1;
+
+  FMaxItemsPerFile := Value;
+
+  if (FMaxItemsPerFile > 0) and (FTotal > 0) then
   begin
-    FMaxItemsPerFile := Value;
-    CreateDictionaryReset;
-    if FMaxItemsPerFile > 0 then
-    begin
-      FTotalFiles := Trunc(FTotal / FMaxItemsPerFile);
-      if (FTotal mod FMaxItemsPerFile) <> 0 then
-        FTotalFiles := FTotalFiles + 1;
-      FFileIndexDigits := Length(IntToStr(FTotalFiles));
-    end;
-    FFilesToDo := FTotalFiles;
+    FTotalFiles := Trunc(FTotal / FMaxItemsPerFile);
+    if (FTotal mod FMaxItemsPerFile) <> 0 then
+      FTotalFiles := FTotalFiles + 1;
+    FFileIndexDigits := Length(IntToStr(FTotalFiles - 1));
   end;
+
+  FFilesToDo := FTotalFiles;
 
 end;
 
