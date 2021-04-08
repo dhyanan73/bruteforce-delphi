@@ -395,9 +395,60 @@ procedure ShuffleItems(FileName: string; NIntems: Int64; Backup: boolean = false
 var
   SourceStream: TFileStream;
   Writer: TStreamWriter;
-  ShuffleFileName, Line: String;
-  ProcessedIntems, LineToProcess, LinePos: Int64;
+  ShuffleFileName: String;
+  ItemsToProcess, LineToProcess, LinePos: Int64;
   Character: char;
+
+  procedure GoToLine(Dest: Int64);
+  begin
+
+    while LinePos <> Dest do
+    begin
+      if Dest < LinePos then
+      begin
+        SourceStream.Seek(0, TSeekOrigin.soBeginning);
+        LinePos := 1;
+        Continue;
+      end;
+      repeat
+        SourceStream.Read(Character, 1);
+      until (Character = #13) or (Character = #10);
+      SourceStream.Read(Character, 1);
+      if (Character <> #13) and (Character <> #10) then
+        SourceStream.Seek(Length(Character) * (-1), TSeekOrigin.soCurrent);
+      LinePos := LinePos + 1;
+    end;
+
+  end;
+
+  function ChkCurrLineProcessed: boolean;
+  begin
+
+      SourceStream.Read(Character, 1);
+      Result := Character = #9;
+      SourceStream.Seek(-1, TSeekOrigin.soCurrent);
+
+  end;
+
+  function ReadLine: string;
+  begin
+
+      Result := '';
+      SourceStream.Read(Character, 1);
+
+      repeat
+        Result := Result + Character;
+        SourceStream.Read(Character, 1);
+      until (Character = #13) or (Character = #10);
+
+      SourceStream.Seek((Length(Result) * (-1)) - Length(Character), TSeekOrigin.soCurrent);
+      Character := #9;
+      SourceStream.Write(Character, 1);
+      SourceStream.Seek(Length(Character) * (-1), TSeekOrigin.soCurrent);
+      ItemsToProcess := ItemsToProcess - 1;
+
+  end;
+
 begin
 
   if Backup then
@@ -410,62 +461,21 @@ begin
   Writer := TStreamWriter.Create(ShuffleFileName, false);
 
   try
-//    Writer.AutoFlush := true;
-    ProcessedIntems := 0;
-    LinePos := 1;
-    while ProcessedIntems < NIntems do
+    ItemsToProcess := NIntems;
+    while ItemsToProcess > 0 do
     begin
-    // Select random line to process
-      LineToProcess := ModInt64(Abs(RandU64), NIntems) + 1;
-    // Moving to begin of line to process
-      while LinePos <> LineToProcess do
+      LineToProcess := ModInt64(Abs(RandU64), ItemsToProcess) + 1;
+      SourceStream.Seek(0, TSeekOrigin.soBeginning);
+      LinePos := 1;
+      if not ChkCurrLineProcessed then
+        LineToProcess := LineToProcess - 1;
+      while LineToProcess > 0 do
       begin
-        if LineToProcess < LinePos then
-        begin
-          SourceStream.Seek(0, TSeekOrigin.soBeginning);
-          LinePos := 1;
-          Continue;
-        end;
-        repeat
-        SourceStream.Read(Character, 1);
-        until (Character = #13) or (Character = #10);
-        SourceStream.Read(Character, 1);
-        if (Character <> #13) and (Character <> #10) then
-          SourceStream.Seek(Length(Character) * (-1), TSeekOrigin.soCurrent);
-        LinePos := LinePos + 1;
+        GoToLine(LinePos + 1);
+        if not ChkCurrLineProcessed then
+          LineToProcess := LineToProcess - 1;
       end;
-    // Get line or discard it if marked as processed (starting with #9 char)
-      SourceStream.Read(Character, 1);
-      if Character = #9 then
-      begin
-        SourceStream.Seek(-1, TSeekOrigin.soCurrent);
-        Continue;
-      end;
-      Line := '';
-      while (Character <> #13) and (Character <> #10) do
-      begin
-        Line := Line + Character;
-        SourceStream.Read(Character, 1);
-      end;
-    // Add line to shuffle file
-      Writer.WriteLine(Line);
-    // Mark line as processed overwriting first char with horizontal tab (#9)
-      SourceStream.Seek((Length(Line) * (-1)) - Length(Character), TSeekOrigin.soCurrent);
-      Character := #9;
-      SourceStream.Write(Character, 1);
-    // If not is last last line then move to next line, otherwise move at line begin
-      if LineToProcess < NIntems then
-      begin
-        SourceStream.Seek(Length(Line), TSeekOrigin.soCurrent);
-        SourceStream.Read(Character, 1);
-        if (Character <> #13) and (Character <> #10) then
-          SourceStream.Seek(Length(Character) * (-1), TSeekOrigin.soCurrent);
-        LinePos := LinePos + 1;
-      end
-      else
-        SourceStream.Seek(Length(Character) * (-1), TSeekOrigin.soCurrent);
-    // Increment processed lines counter
-      ProcessedIntems := ProcessedIntems + 1;
+      Writer.WriteLine(ReadLine);
     end;
   finally
     SourceStream.Free;

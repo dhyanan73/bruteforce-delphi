@@ -513,7 +513,19 @@ end;
 procedure TfrmMain.cmdClearLogClick(Sender: TObject);
 begin
 
-  txtLog.Lines.Clear;
+  cmdClearLog.Enabled := false;
+
+  try
+    txtLog.Lines.BeginUpdate;
+    try
+      txtLog.Lines.Clear;
+    finally
+      txtLog.Lines.EndUpdate;
+    end;
+    Application.ProcessMessages;
+  finally
+    cmdClearLog.Enabled := true;
+  end;
 
 end;
 
