@@ -94,6 +94,8 @@ type
     txtLog: TMemo;
     cmdClearLog: TButton;
     chkBackup: TCheckBox;
+    stbMain: TStatusBar;
+    lblAbout: TLabel;
     procedure AddRowToPasswordDict(Row: string);
     procedure AddRowToUserNameDict(Row: string);
     procedure FormCreate(Sender: TObject);
@@ -138,8 +140,9 @@ type
     procedure cmdSelDirClick(Sender: TObject);
     procedure cmdResetFILEClick(Sender: TObject);
     procedure cmdClearLogClick(Sender: TObject);
-    procedure chkShufflePaint(Sender: TObject; Canvas: TCanvas;
-      const ARect: TRectF);
+    procedure chkShufflePaint(Sender: TObject; Canvas: TCanvas; const ARect: TRectF);
+    procedure txtMinLengthClick(Sender: TObject);
+    procedure stbMainClick(Sender: TObject);
   private
     CurrTask: ITask;
     Bruteforce: TBruteForce;
@@ -164,7 +167,38 @@ implementation
 
 uses
   System.Diagnostics
-  , System.TimeSpan;
+  , System.TimeSpan
+
+{$IF Defined(MSWINDOWS)}
+  , Winapi.Windows
+  , Winapi.ShellAPI
+{$ENDIF}
+
+  ;
+
+procedure ShellCommand(const Command: string);
+{$IF Defined(ANDROID)}
+var
+  Intent: JIntent;
+{$ENDIF}
+
+begin
+
+{$IF Defined(ANDROID)}
+  Intent := TJIntent.Create;
+  Intent.setAction(TJIntent.JavaClass.ACTION_VIEW);
+  Intent.setData(StrToJURI(Command));
+  tandroidhelper.Activity.startActivity(Intent);
+  // SharedActivity.startActivity(Intent);
+{$ELSEIF Defined(MSWINDOWS)}
+  ShellExecute(0, 'OPEN', PWideChar(Command), nil, nil, SW_SHOWNORMAL);
+{$ELSEIF Defined(IOS)}
+  SharedApplication.OpenURL(StrToNSUrl(Command));
+{$ELSEIF Defined(MACOS)}
+  _system(PAnsiChar('open ' + AnsiString(Command)));
+{$ENDIF}
+
+end;
 
 function StrArraysEquals(Array1: TArray<string>; Array2: TArray<string>): boolean;
 var
@@ -1211,6 +1245,13 @@ begin
 
 end;
 
+procedure TfrmMain.stbMainClick(Sender: TObject);
+begin
+
+  ShellCommand('https://github.com/dhyanan73/bruteforce-delphi');
+
+end;
+
 procedure TfrmMain.AddRowToPasswordDict(Row: string);
 begin
 
@@ -1256,6 +1297,13 @@ procedure TfrmMain.TaskFinished;
 begin
 
   CurrTask := nil;
+
+end;
+
+procedure TfrmMain.txtMinLengthClick(Sender: TObject);
+begin
+
+  ShellCommand('https://github.com/dhyanan73');
 
 end;
 

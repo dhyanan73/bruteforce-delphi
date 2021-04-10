@@ -249,8 +249,8 @@ begin
                                     AddListItemCallback(Line);
                                   end
             );
-            Done := Done + Length(Line);
-            ToDo := ToDo + Length(Line);
+            Done := Done + Length(Line) + 2;
+            ToDo := ToDo - Length(Line) - 2;
             if Assigned(ProgressCallback) then
               TThread.Synchronize (
                                     TThread.CurrentThread,
