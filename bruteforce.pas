@@ -391,13 +391,21 @@ begin
 
 end;
 
-procedure ShuffleItems(FileName: string; NIntems: Int64; Backup: boolean = false);
+procedure ShuffleItems  (
+                          FileName: string;
+                          NIntems: Int64;
+                          Backup: boolean = false;
+                          Callback: TCreateDictionaryCallback = nil;
+                          FilesDone: Int64 = 0;
+                          TotalFiles: Int64 = 0
+                        );
 var
   SourceStream: TFileStream;
   Writer: TStreamWriter;
   ShuffleFileName: String;
   ItemsToProcess, LineToProcess, LinePos: Int64;
   Character: char;
+  Stop: boolean;
 
   procedure GoToLine(Dest: Int64);
   begin
@@ -476,6 +484,25 @@ begin
           LineToProcess := LineToProcess - 1;
       end;
       Writer.WriteLine(ReadLine);
+      if Assigned(Callback) then
+      begin
+        Stop := false;
+        TThread.Synchronize(
+                        TThread.CurrentThread,
+                        procedure
+                        begin
+                          Callback (
+                                      NIntems,
+                                      NIntems - ItemsToProcess,
+                                      ItemsToProcess,
+                                      TotalFiles,
+                                      FilesDone,
+                                      0,
+                                      Stop
+                                    );
+                        end
+        );
+      end;
     end;
   finally
     SourceStream.Free;
@@ -902,41 +929,43 @@ begin
       TThread.Sleep(1000);
       if FShuffle then
       begin
-        TThread.Synchronize(
-                        TThread.CurrentThread,
-                        procedure
-                        begin
-                          FCallback (
-                                      FTotal,
-                                      FDone,
-                                      FToDo,
-                                      TotalFiles,
-                                      FilesDone,
-                                      FilesToDo,
-                                      Stop,
-                                      '',
-                                      'Starting to shuffle the file ' + FilePathName + '...'
-                                    );
-                        end
-        );
-        ShuffleItems(FilePathName, FFileItems, FBackup);
-        TThread.Synchronize(
-                        TThread.CurrentThread,
-                        procedure
-                        begin
-                          FCallback (
-                                      FTotal,
-                                      FDone,
-                                      FToDo,
-                                      TotalFiles,
-                                      FilesDone,
-                                      FilesToDo,
-                                      Stop,
-                                      '',
-                                      'Shuffling of the file ' + FilePathName + ' completed'
-                                    );
-                        end
-        );
+        if Assigned(FCallback) then
+          TThread.Synchronize(
+                          TThread.CurrentThread,
+                          procedure
+                          begin
+                            FCallback (
+                                        FTotal,
+                                        FDone,
+                                        FToDo,
+                                        TotalFiles,
+                                        FilesDone,
+                                        FilesToDo,
+                                        Stop,
+                                        '',
+                                        'Starting to shuffle the file ' + FilePathName + '...'
+                                      );
+                          end
+          );
+        ShuffleItems(FilePathName, FFileItems, FBackup, FCallback, FilesDone, TotalFiles);
+        if Assigned(FCallback) then
+          TThread.Synchronize(
+                          TThread.CurrentThread,
+                          procedure
+                          begin
+                            FCallback (
+                                        FTotal,
+                                        FDone,
+                                        FToDo,
+                                        TotalFiles,
+                                        FilesDone,
+                                        FilesToDo,
+                                        Stop,
+                                        '',
+                                        'Shuffling of the file ' + FilePathName + ' completed'
+                                      );
+                          end
+          );
       end;
       FFilesToDo := FFilesToDo - 1;
       FFilesDone := FFilesDone + 1;
@@ -947,13 +976,14 @@ begin
       CloseFile(FFileHandler);
       TThread.Sleep(1000);
     end;
-    TThread.Synchronize(
-                    TThread.CurrentThread,
-                    procedure
-                    begin
-                      FCallback(FTotal, FDone, FToDo, TotalFiles, FilesDone, FilesToDo, Stop);
-                    end
-    );
+    if Assigned(FCallback) then
+      TThread.Synchronize(
+                      TThread.CurrentThread,
+                      procedure
+                      begin
+                        FCallback(FTotal, FDone, FToDo, TotalFiles, FilesDone, FilesToDo, Stop);
+                      end
+      );
     Result := not Stop;
   except
     on E: Exception do

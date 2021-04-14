@@ -141,7 +141,6 @@ type
     procedure cmdResetFILEClick(Sender: TObject);
     procedure cmdClearLogClick(Sender: TObject);
     procedure chkShufflePaint(Sender: TObject; Canvas: TCanvas; const ARect: TRectF);
-    procedure txtMinLengthClick(Sender: TObject);
     procedure stbMainClick(Sender: TObject);
   private
     CurrTask: ITask;
@@ -791,7 +790,7 @@ begin
     Log('Bruteforce start...');
     prgWait.Max := 0;
     prgWait.Value := 0;
-    Application.ProcessMessages;
+    prgWait.Visible := false;
     panWait.Visible := true;
     Application.ProcessMessages;
     grdOutputBT.BeginUpdate;
@@ -833,8 +832,11 @@ begin
       grdOutputBT.EndUpdate;
       grdOutputBTResized(nil);
       panWait.Visible := false;
+      prgWait.Visible := false;
       tabMain.Enabled := true;
       cmdStartBT.Enabled := true;
+      prgWait.Max := 0;
+      prgWait.Value := 0;
       Application.ProcessMessages;
     end;
   except
@@ -860,7 +862,7 @@ begin
     Log('Dictionary start...');
     prgWait.Max := 0;
     prgWait.Value := 0;
-    Application.ProcessMessages;
+    prgWait.Visible := false;
     panWait.Visible := true;
     Application.ProcessMessages;
     grdOutputDICT.BeginUpdate;
@@ -902,8 +904,11 @@ begin
       grdOutputDICT.EndUpdate;
       grdOutputDICTResized(nil);
       panWait.Visible := false;
+      prgWait.Visible := false;
       tabMain.Enabled := true;
       cmdStartDICT.Enabled := true;
+      prgWait.Max := 0;
+      prgWait.Value := 0;
       Application.ProcessMessages;
     end;
   except
@@ -950,7 +955,7 @@ begin
     Log('Dictionary create start...');
     prgWait.Max := 0;
     prgWait.Value := 0;
-    Application.ProcessMessages;
+    prgWait.Visible := false;
     panWait.Visible := true;
     Application.ProcessMessages;
     try
@@ -1015,6 +1020,9 @@ begin
       panWait.Visible := false;
       tabMain.Enabled := true;
       cmdStartFILE.Enabled := true;
+      prgWait.Visible := false;
+      prgWait.Max := 0;
+      prgWait.Value := 0;
       Application.ProcessMessages;
     end;
   except
@@ -1045,50 +1053,68 @@ procedure TfrmMain.CreateDictionaryCallback (
                                             );
 begin
 
-  if Assigned(CurrTask) then
-    CurrTask.CheckCanceled;
-
-  if ErrMsg <> '' then
-  begin
-    Log(ErrMsg, TIoTLogType.ltError);
-    Exit;
-  end;
-
-  if Total > 0 then
-  begin
+  try
+    if Assigned(CurrTask) then
+      CurrTask.CheckCanceled;
+    if ErrMsg <> '' then
+    begin
+      Log(ErrMsg, TIoTLogType.ltError);
+      Exit;
+    end;
+    if FilesToDo > 0 then
+    begin
+      labWaitDone.Text := Format('Done : %d (%d files)', [Done, FilesDone]);
+      lblWaitToDo.Text := Format('To do: %d (%d files)', [ToDo, FilesToDo]);
+      lblWaitTotal.Text := Format('Total: %d (%d files)', [Total, TotalFiles]);
+    end
+    else
+    begin
+      labWaitDone.Text := Format('SHUFFLING FILE %d/%d...' + sLineBreak + 'Done : %d', [FilesDone + 1, TotalFiles, Done]);
+      lblWaitToDo.Text := Format('To do: %d', [ToDo]);
+      lblWaitTotal.Text := Format('Total: %d', [Total]);
+    end;
     prgWait.Max := Total;
     prgWait.Value := Done;
-    labWaitDone.Text := Format('Done : %d (%d files)', [Done, FilesDone]);
-    lblWaitToDo.Text := Format('To do: %d (%d files)', [ToDo, FilesToDo]);
-    lblWaitTotal.Text := Format('Total: %d (%d files)', [Total, TotalFiles]);
     if Msg <> '' then
       Log(Msg);
     Application.ProcessMessages;
+  finally
+    if (not Stop) <> prgWait.Visible then
+      prgWait.Visible := not Stop;
   end;
 
 end;
 
 procedure TfrmMain.DICTProgressCallback(Password: TCredentials; Total, Done, ToDo: Int64; ErrMsg: string);
+var
+  Stop: boolean;
+
 begin
 
-  if Assigned(CurrTask) then
-    CurrTask.CheckCanceled;
+  Stop := not ((Total > 0) and (ToDo > 0));
 
-  if ErrMsg <> '' then
-  begin
-    Log(ErrMsg, TIoTLogType.ltError);
-    Exit;
-  end;
-
-  if Total > 0 then
-  begin
-    prgWait.Max := Total;
-    prgWait.Value := Done;
-    labWaitDone.Text := Format('Done : %d', [Done]);
-    lblWaitToDo.Text := Format('To do: %d', [ToDo]);
-    lblWaitTotal.Text := Format('Total: %d', [Total]);
-    AddRow(grdOutputDICT, Password);
-    Application.ProcessMessages;
+  try
+    if Assigned(CurrTask) then
+      CurrTask.CheckCanceled;
+    if ErrMsg <> '' then
+    begin
+      Stop := true;
+      Log(ErrMsg, TIoTLogType.ltError);
+      Exit;
+    end;
+    if Total > 0 then
+    begin
+      prgWait.Max := Total;
+      prgWait.Value := Done;
+      labWaitDone.Text := Format('Done : %d', [Done]);
+      lblWaitToDo.Text := Format('To do: %d', [ToDo]);
+      lblWaitTotal.Text := Format('Total: %d', [Total]);
+      AddRow(grdOutputDICT, Password);
+      Application.ProcessMessages;
+    end;
+  finally
+    if (not Stop) <> prgWait.Visible then
+      prgWait.Visible := not Stop;
   end;
 
 end;
@@ -1269,26 +1295,35 @@ begin
 end;
 
 procedure TfrmMain.BFProgressCallback(Password: string; Total, Done, ToDo: Int64; ErrMsg: string = '');
+var
+  Stop: boolean;
+
 begin
 
-  if Assigned(CurrTask) then
-    CurrTask.CheckCanceled;
+  Stop := not ((Total > 0) and (ToDo > 0));
 
-  if ErrMsg <> '' then
-  begin
-    Log(ErrMsg, TIoTLogType.ltError);
-    Exit;
-  end;
-
-  if Total > 0 then
-  begin
-    prgWait.Max := Total;
-    prgWait.Value := Done;
-    labWaitDone.Text := Format('Done : %d', [Done]);
-    lblWaitToDo.Text := Format('To do: %d', [ToDo]);
-    lblWaitTotal.Text := Format('Total: %d', [Total]);
-    AddRow(grdOutputBT, Password);
-    Application.ProcessMessages;
+  try
+    if Assigned(CurrTask) then
+      CurrTask.CheckCanceled;
+    if ErrMsg <> '' then
+    begin
+      Stop := true;
+      Log(ErrMsg, TIoTLogType.ltError);
+      Exit;
+    end;
+    if Total > 0 then
+    begin
+      prgWait.Max := Total;
+      prgWait.Value := Done;
+      labWaitDone.Text := Format('Done : %d', [Done]);
+      lblWaitToDo.Text := Format('To do: %d', [ToDo]);
+      lblWaitTotal.Text := Format('Total: %d', [Total]);
+      AddRow(grdOutputBT, Password);
+      Application.ProcessMessages;
+    end;
+  finally
+    if (not Stop) <> prgWait.Visible then
+      prgWait.Visible := not Stop;
   end;
 
 end;
@@ -1297,13 +1332,6 @@ procedure TfrmMain.TaskFinished;
 begin
 
   CurrTask := nil;
-
-end;
-
-procedure TfrmMain.txtMinLengthClick(Sender: TObject);
-begin
-
-  ShellCommand('https://github.com/dhyanan73');
 
 end;
 
@@ -1342,8 +1370,8 @@ begin
       Bruteforce := TBruteforce.Create(Characters, MinLength, MaxLength);
       ClearRows(grdOutputBT);
     end;
-    if Bruteforce.Total > 2147483008 then
-      txtStoAt.Text := '2147483008';
+//    if Bruteforce.Total > 2147483008 then
+//      txtStoAt.Text := '2147483008';
   except
     on E: Exception do
     begin
@@ -1419,8 +1447,8 @@ begin
                                                 );
       ClearRows(grdOutputDICT);
     end;
-    if chkBruteforce.IsChecked and (BruteforceDict.Total > 2147483008) then
-      txtStoAt.Text := '2147483008';
+//    if chkBruteforce.IsChecked and (BruteforceDict.Total > 2147483008) then
+//      txtStoAt.Text := '2147483008';
   except
     on E: Exception do
     begin
